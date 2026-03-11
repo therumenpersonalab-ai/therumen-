@@ -58,6 +58,8 @@ const PURPOSE_OPTIONS = [
   { id:"edu",       label:"📚 교육·강의",   desc:"강의·프로그램" },
 ];
 
+const BUSINESS_MODES = ["auto","판매형","소개/문의형","포트폴리오형","예약형","콘텐츠형","커뮤니티형","행사/프로모션형"];
+
 const PAGE_OPTIONS = [
   { id:"about",     label:"회사 소개" },
   { id:"service",   label:"서비스/제품" },
@@ -824,7 +826,7 @@ export default function LumenWebBuilder() {
   const previewSrc = editMode ? makeEditableHtml(resultHtml) : resultHtml;
 
   const [form, setForm] = useState({
-    company:"", industry:"", description:"", services:"", ceo:"",
+    company:"", industry:"", businessMode:"auto", description:"", services:"", ceo:"",
     purpose:[], target:"", pages:[],
     selectedTheme:null, mood:"", color:"",
     illustStyle:"flat",
@@ -950,7 +952,7 @@ export default function LumenWebBuilder() {
           <div style={{ background:"#F0FDF4", border:"1px solid #BBF7D0", borderRadius:12, padding:"15px 18px", marginBottom:18, textAlign:"left" }}>
             <div style={{ fontSize:13, fontWeight:600, color:"#166534", marginBottom:7 }}>🎁 가입 혜택</div>
             <div style={{ fontSize:13, color:"#15803D", lineHeight:2 }}>
-              • 무료 크레딧 <strong>200C</strong> 즉시 지급<br />
+              • 무료 모드 <strong>비용 0원</strong> 즉시 사용<br />
               • 업종별 <strong>자동 프리셋</strong> (텍스트·테마·구성)<br />
               • Gamma AI 수준 <strong>디자인 시스템</strong> 적용<br />
               • <strong>4단계</strong>만에 완성 (체크만 하면 OK)
@@ -964,7 +966,7 @@ export default function LumenWebBuilder() {
               </div>
             ))}
           </div>
-          <button style={BTNP} onClick={() => setStep("form")}>무료로 시작하기 (200C 보유 중)</button>
+          <button style={BTNP} onClick={() => setStep("form")}>무료로 시작하기 (로컬 템플릿 모드)</button>
           <div style={{ fontSize:11, color:"#94A3B8", marginTop:9 }}>카드 정보 불필요 · 즉시 사용</div>
         </div>
       </div>
@@ -1005,6 +1007,16 @@ export default function LumenWebBuilder() {
                   ✅ <strong>{form.industry}</strong> 프리셋 적용됨 — 소개글·서비스·테마·구성페이지 자동 세팅 완료
                 </div>
               )}
+            </div>
+            <div style={FLD}>
+              <label style={LBL}>운영 목적(템플릿 모드)</label>
+              <div style={{ display:"flex", flexWrap:"wrap" }}>
+                {BUSINESS_MODES.map(m => (
+                  <span key={m} style={chip(form.businessMode === m)} onClick={() => upd("businessMode", m)}>
+                    {form.businessMode === m ? "✓ " : ""}{m === "auto" ? "자동 추천" : m}
+                  </span>
+                ))}
+              </div>
             </div>
             <div style={FLD}>
               <label style={LBL}>상호명 / 브랜드명 *</label>
@@ -1113,7 +1125,7 @@ export default function LumenWebBuilder() {
               <div style={{ fontSize:13, fontWeight:600, color:"#0369A1", marginBottom:8 }}>📋 생성 요약</div>
               <div style={{ fontSize:12, color:"#0C4A6E", lineHeight:2.2 }}>
                 <strong>{form.company || "(상호명)"}</strong> · {form.industry}<br />
-                테마: {form.selectedTheme ? form.selectedTheme.name : "자동"} · 톤: {(INTRO_TONES.find(t => t.id === form.introTone) || {}).label}<br />
+                테마: {form.selectedTheme ? form.selectedTheme.name : "자동"} · 모드: {form.businessMode === "auto" ? "자동 추천" : form.businessMode} · 톤: {(INTRO_TONES.find(t => t.id === form.introTone) || {}).label}<br />
                 구성: {form.pages.map(id => (PAGE_OPTIONS.find(p => p.id === id) || {}).label).join(", ")}<br />
                 {form.kakaoId ? "💬 @" + form.kakaoId + "  " : ""}{form.naverUrl ? "📅 네이버예약  " : ""}
                 {form.uploadedImages.logo ? "🏷️ 로고  " : ""}{form.uploadedImages.hero ? "🖼️ 히어로  " : ""}
