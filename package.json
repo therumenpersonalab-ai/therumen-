@@ -1,35 +1,27 @@
 {
-  "name": "therumen",
-  "version": "0.1.0",
+  "name": "lumen-web-builder",
+  "version": "0.5.2",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "prisma generate && next build",
-    "start": "next start",
-    "lint": "eslint",
-    "db:push": "prisma db push",
-    "db:generate": "prisma generate"
+    "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
+    "dev:client": "vite",
+    "dev:server": "node --watch server/index.js",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "node server/index.js"
   },
   "dependencies": {
-    "@prisma/client": "^6.11.1",
-    "bcryptjs": "^3.0.3",
-    "next": "16.1.6",
-    "next-auth": "^4.24.13",
-    "nodemailer": "^7.0.13",
-    "prisma": "^6.11.1",
-    "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/bcryptjs": "^2.4.6",
-    "@types/node": "^20",
-    "@types/nodemailer": "^7.0.11",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.1.6",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "@types/react": "^18.3.18",
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.2",
+    "vite": "^6.0.0"
   }
 }
