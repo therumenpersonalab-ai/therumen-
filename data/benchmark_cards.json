@@ -4,7 +4,13 @@
     "site_url": "https://info64651.imweb.me/",
     "industry_vertical": "패션/잡화",
     "business_mode": "판매형",
-    "key_modules": ["brand-story", "shop-categories", "contact", "cart", "login"],
+    "key_modules": [
+      "brand-story",
+      "shop-categories",
+      "contact",
+      "cart",
+      "login"
+    ],
     "visual_mood": "minimal-premium"
   },
   {
@@ -12,7 +18,12 @@
     "site_url": "https://ousque-showroom.imweb.me/",
     "industry_vertical": "패션/잡화",
     "business_mode": "판매형",
-    "key_modules": ["archive-board", "notice-board", "site-search", "language-toggle"],
+    "key_modules": [
+      "archive-board",
+      "notice-board",
+      "site-search",
+      "language-toggle"
+    ],
     "visual_mood": "editorial"
   },
   {
@@ -20,7 +31,12 @@
     "site_url": "https://praxisroom.imweb.me/",
     "industry_vertical": "예술/디자인",
     "business_mode": "포트폴리오형",
-    "key_modules": ["visual-first-hero", "roomtour", "qna", "notice"],
+    "key_modules": [
+      "visual-first-hero",
+      "roomtour",
+      "qna",
+      "notice"
+    ],
     "visual_mood": "image-immersive"
   },
   {
@@ -28,7 +44,11 @@
     "site_url": "https://designcheongchun.imweb.me/",
     "industry_vertical": "인테리어/건축",
     "business_mode": "포트폴리오형",
-    "key_modules": ["project-category-grid", "case-grid", "inquiry-cta"],
+    "key_modules": [
+      "project-category-grid",
+      "case-grid",
+      "inquiry-cta"
+    ],
     "visual_mood": "minimal-editorial"
   },
   {
@@ -36,7 +56,12 @@
     "site_url": "https://testo.imweb.me/",
     "industry_vertical": "취미/생활",
     "business_mode": "판매형",
-    "key_modules": ["utility-bar", "time-sale", "promotion-badge", "brand-story"],
+    "key_modules": [
+      "utility-bar",
+      "time-sale",
+      "promotion-badge",
+      "brand-story"
+    ],
     "visual_mood": "bold-d2c"
   },
   {
@@ -44,7 +69,13 @@
     "site_url": "https://ithaca.imweb.me/",
     "industry_vertical": "IT/가전",
     "business_mode": "판매형",
-    "key_modules": ["brand", "product", "editorial-picks", "support-pack", "instagram-feed"],
+    "key_modules": [
+      "brand",
+      "product",
+      "editorial-picks",
+      "support-pack",
+      "instagram-feed"
+    ],
     "visual_mood": "lifestyle-magazine"
   },
   {
@@ -52,7 +83,13 @@
     "site_url": "https://wanspapa.imweb.me/",
     "industry_vertical": "동물/식물",
     "business_mode": "판매형",
-    "key_modules": ["faq", "reviews", "qna", "event", "trust-stack"],
+    "key_modules": [
+      "faq",
+      "reviews",
+      "qna",
+      "event",
+      "trust-stack"
+    ],
     "visual_mood": "friendly-trust"
   },
   {
@@ -60,7 +97,67 @@
     "site_url": "https://fast-design.imweb.me/",
     "industry_vertical": "인테리어/건축",
     "business_mode": "콘텐츠형",
-    "key_modules": ["filter-first-marketplace", "resource-pack", "category-filter"],
+    "key_modules": [
+      "filter-first-marketplace",
+      "resource-pack",
+      "category-filter"
+    ],
     "visual_mood": "corporate-tooling"
+  },
+  {
+    "site_name": "team",
+    "site_url": "https://team.imweb.me/",
+    "industry_vertical": "IT/가전",
+    "business_mode": "커뮤니티형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-11T15:30:06.611Z"
+  },
+  {
+    "site_name": "salessupport",
+    "site_url": "https://salessupport.imweb.me/",
+    "industry_vertical": "IT/가전",
+    "business_mode": "판매형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-11T15:30:06.611Z"
+  },
+  {
+    "site_name": "developers",
+    "site_url": "https://developers.imweb.me/",
+    "industry_vertical": "기업/비즈니스",
+    "business_mode": "소개/문의형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-11T15:30:06.611Z"
+  },
+  {
+    "site_name": "design",
+    "site_url": "https://design.imweb.me/",
+    "industry_vertical": "IT/가전",
+    "business_mode": "판매형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-11T15:30:06.611Z"
   }
 ]

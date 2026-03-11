@@ -1,0 +1,34 @@
+{
+  "analyzed": [
+    "https://info64651.imweb.me/",
+    "https://ousque-showroom.imweb.me/",
+    "https://praxisroom.imweb.me/",
+    "https://designcheongchun.imweb.me/",
+    "https://testo.imweb.me/",
+    "https://ithaca.imweb.me/",
+    "https://wanspapa.imweb.me/",
+    "https://fast-design.imweb.me/",
+    "https://team.imweb.me/",
+    "https://salessupport.imweb.me/",
+    "https://developers.imweb.me/",
+    "https://design.imweb.me/"
+  ],
+  "lastRun": "2026-03-11T15:30:06.611Z",
+  "logs": [
+    {
+      "at": "2026-03-11T15:30:06.611Z",
+      "url": "https://cdn.imweb.me/",
+      "error": "https://cdn.imweb.me/ 403"
+    },
+    {
+      "at": "2026-03-11T15:30:06.611Z",
+      "url": "https://static.imweb.me/",
+      "error": "https://static.imweb.me/ 403"
+    },
+    {
+      "at": "2026-03-11T15:30:06.611Z",
+      "processed": 6,
+      "added": 4
+    }
+  ]
+}
