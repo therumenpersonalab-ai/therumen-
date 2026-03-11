@@ -2,12 +2,12 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { generateLocalHtml } from "./api/localGenerator";
 import benchmarkCards from "../data/benchmark_cards.json";
 
-const INITIAL_CREDIT  = 9999;
-const COST_GENERATE   = 0;
-const COST_REGENERATE = 0;
-const COST_AI_IMAGE   = 0;
-const COST_TEXT_EDIT   = 0;
-const COST_INLINE_EDIT = 0;
+const INITIAL_CREDIT  = 200;
+const COST_GENERATE   = 80;
+const COST_REGENERATE = 30;
+const COST_AI_IMAGE   = 20;
+const COST_TEXT_EDIT   = 5;
+const COST_INLINE_EDIT = 3;
 
 // ── 업종별 자동 프리셋 (아임웹 시각 클러스터 반영) ──────────
 const INDUSTRY_PRESETS = {
@@ -473,6 +473,40 @@ function CreditBadge({ credit }) {
   );
 }
 
+function AdminTransferBox({ authToken, onDone }) {
+  const [targetEmail, setTargetEmail] = useState('');
+  const [amount, setAmount] = useState('100');
+  const [loading, setLoading] = useState(false);
+
+  const submit = async () => {
+    setLoading(true);
+    try {
+      const r = await fetch('/api/admin-transfer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+        body: JSON.stringify({ targetEmail, amount: Number(amount) }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || '전송 실패');
+      alert(`크레딧 전송 완료: ${d.user.email} (${d.user.credits}C)`);
+      setTargetEmail('');
+      onDone?.();
+    } catch (e) {
+      alert(e.message);
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div style={{ border:'1px dashed #CBD5E1', borderRadius:10, padding:10 }}>
+      <div style={{ fontSize:12, fontWeight:600, marginBottom:6 }}>관리자 크레딧 지급</div>
+      <input style={{ width:'100%', padding:8, border:'1px solid #E2E8F0', borderRadius:8, marginBottom:6 }} placeholder='대상 이메일' value={targetEmail} onChange={e => setTargetEmail(e.target.value)} />
+      <input style={{ width:'100%', padding:8, border:'1px solid #E2E8F0', borderRadius:8, marginBottom:6 }} placeholder='크레딧 수량' value={amount} onChange={e => setAmount(e.target.value)} />
+      <button onClick={submit} disabled={loading || !targetEmail} style={{ width:'100%', padding:8, border:'none', borderRadius:8, background:'#2563EB', color:'#fff', cursor:'pointer' }}>{loading ? '처리 중...' : '크레딧 지급'}</button>
+    </div>
+  );
+}
+
 function ImageDropZone({ label, hint, multiple, value, onChange, compact }) {
   const ref = useRef();
   const [drag, setDrag] = useState(false);
@@ -776,9 +810,19 @@ function RightPanel({ credit, setCredit, form, resultHtml, setResultHtml, applie
 
 // ── 메인 ──────────────────────────────────────────────────────
 export default function LumenWebBuilder() {
+  const [authToken, setAuthToken]     = useState(() => localStorage.getItem("lumen_token") || "");
+  const [me, setMe]                   = useState(null);
+  const [authMode, setAuthMode]       = useState("login");
+  const [authForm, setAuthForm]       = useState({ email:"", password:"", name:"" });
+  const [authLoading, setAuthLoading] = useState(false);
+
   const [step, setStep]               = useState("intro");
   const [formStep, setFormStep]       = useState(0);
   const [credit, setCredit]           = useState(INITIAL_CREDIT);
+  useEffect(() => {
+    if (me?.role === 'admin') setCredit(99999999);
+    else if (typeof me?.credits === 'number') setCredit(me.credits);
+  }, [me]);
   const [appliedFeatures, setApplied] = useState([]);
   const [genLog, setGenLog]           = useState([]);
   const [genProgress, setProgress]    = useState(0);
@@ -825,6 +869,55 @@ export default function LumenWebBuilder() {
   };
 
   const previewSrc = editMode ? makeEditableHtml(resultHtml) : resultHtml;
+
+  async function fetchMe(token) {
+    if (!token) { setMe(null); return; }
+    try {
+      const r = await fetch('/api/auth-me', { headers: { Authorization: `Bearer ${token}` } });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || '인증 실패');
+      setMe(d.user);
+    } catch {
+      localStorage.removeItem('lumen_token');
+      setAuthToken('');
+      setMe(null);
+    }
+  }
+
+  useEffect(() => { fetchMe(authToken); }, [authToken]);
+
+  async function submitAuth() {
+    setAuthLoading(true);
+    try {
+      const endpoint = authMode === 'signup' ? '/api/auth-signup' : '/api/auth-login';
+      const payload = authMode === 'signup'
+        ? { email: authForm.email, password: authForm.password, name: authForm.name }
+        : { email: authForm.email, password: authForm.password };
+      const r = await fetch(endpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || '인증 실패');
+      localStorage.setItem('lumen_token', d.token);
+      setAuthToken(d.token);
+      setMe(d.user);
+      setStep('form');
+    } catch (e) {
+      alert(e.message);
+    }
+    setAuthLoading(false);
+  }
+
+  async function useCredit(action) {
+    if (!authToken) throw new Error('로그인이 필요합니다.');
+    const r = await fetch('/api/credits-use', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify({ action }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || '크레딧 처리 실패');
+    await fetchMe(authToken);
+    return d;
+  }
 
   const [form, setForm] = useState({
     company:"", industry:"", businessMode:"auto", benchmarkSiteUrl:"", benchmarkSiteName:"", description:"", services:"", ceo:"",
@@ -905,10 +998,26 @@ export default function LumenWebBuilder() {
     } catch (e) { setGenLog(prev => [...prev, "❌ 오류: " + e.message]); }
   };
 
-  const handleGenerate   = () => { if (credit < COST_GENERATE) return; setCredit(c => c - COST_GENERATE); runGenerate(""); };
-  const handleRegenerate = () => { if (credit < COST_REGENERATE) return; setCredit(c => c - COST_REGENERATE); runGenerate("이전과 완전히 다른 레이아웃과 카드 배치로 재생성. 색감과 타이포는 동일 테마 유지."); };
+  const handleGenerate = async () => {
+    try {
+      await useCredit('generate');
+      runGenerate('');
+    } catch (e) {
+      alert(e.message);
+    }
+  };
+
+  const handleRegenerate = async () => {
+    try {
+      await useCredit('regenerate');
+      runGenerate('이전과 완전히 다른 레이아웃과 카드 배치로 재생성. 색감과 타이포는 동일 테마 유지.');
+    } catch (e) {
+      alert(e.message);
+    }
+  };
 
   const stepValid = () => {
+    if (!me) return false;
     if (formStep === 0) return form.company && form.industry;
     return true;
   };
@@ -972,8 +1081,23 @@ export default function LumenWebBuilder() {
               </div>
             ))}
           </div>
-          <button style={BTNP} onClick={() => setStep("form")}>무료로 시작하기 (로컬 템플릿 모드)</button>
-          <div style={{ fontSize:11, color:"#94A3B8", marginTop:9 }}>카드 정보 불필요 · 즉시 사용</div>
+          {!me ? (
+            <div style={{ marginTop:10, textAlign:'left' }}>
+              <div style={{ display:'flex', gap:8, marginBottom:8 }}>
+                <button style={{ ...BTNS, flex:1, background: authMode==='login' ? '#EFF6FF' : '#fff' }} onClick={() => setAuthMode('login')}>로그인</button>
+                <button style={{ ...BTNS, flex:1, background: authMode==='signup' ? '#EFF6FF' : '#fff' }} onClick={() => setAuthMode('signup')}>회원가입</button>
+              </div>
+              {authMode === 'signup' && <input style={{ ...INP, marginBottom:8 }} placeholder='이름' value={authForm.name} onChange={e => setAuthForm(f => ({...f, name:e.target.value}))} />}
+              <input style={{ ...INP, marginBottom:8 }} placeholder='이메일' value={authForm.email} onChange={e => setAuthForm(f => ({...f, email:e.target.value}))} />
+              <input type='password' style={{ ...INP, marginBottom:8 }} placeholder='비밀번호(8자 이상)' value={authForm.password} onChange={e => setAuthForm(f => ({...f, password:e.target.value}))} />
+              <button style={BTNP} onClick={submitAuth} disabled={authLoading}>{authLoading ? '처리 중...' : (authMode === 'signup' ? '회원가입 후 시작' : '로그인 후 시작')}</button>
+            </div>
+          ) : (
+            <>
+              <button style={BTNP} onClick={() => setStep('form')}>웹사이트 만들기 시작</button>
+              <div style={{ fontSize:11, color:'#0f766e', marginTop:9 }}>로그인됨: {me.email} {me.role === 'admin' ? '(관리자 · 무제한)' : `(크레딧 ${credit}C)`}</div>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -1358,11 +1482,14 @@ export default function LumenWebBuilder() {
               </div>
             </div>
             <div style={{ background:"#fff", border:"1px solid #E2E8F0", borderRadius:12, padding:16 }}>
-              <div style={{ fontSize:14, fontWeight:700, color:"#1E293B", marginBottom:8 }}>🆓 무료 로컬 모드 안내</div>
-              <div style={{ fontSize:12, color:"#64748B", lineHeight:1.7 }}>
-                현재는 API 비용 없이 동작하도록 로컬 템플릿 생성기로 전환되어 있습니다.<br/>
-                업종/테마/입력값에 맞춘 템플릿이 즉시 생성되며, HTML 다운로드 후 바로 사용 가능합니다.
+              <div style={{ fontSize:14, fontWeight:700, color:"#1E293B", marginBottom:8 }}>계정/크레딧</div>
+              <div style={{ fontSize:12, color:"#64748B", lineHeight:1.7, marginBottom:10 }}>
+                {me?.role === 'admin' ? '관리자 계정: 템플릿 생성 무제한' : `현재 크레딧: ${credit}C`}
               </div>
+              {me?.role === 'admin' && (
+                <AdminTransferBox authToken={authToken} onDone={() => fetchMe(authToken)} />
+              )}
+              <button onClick={() => { localStorage.removeItem('lumen_token'); setAuthToken(''); setMe(null); setStep('intro'); }} style={{ marginTop:10, width:'100%', padding:'9px 10px', borderRadius:8, border:'1px solid #E2E8F0', background:'#fff', cursor:'pointer' }}>로그아웃</button>
             </div>
           </div>
         </div>
