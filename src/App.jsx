@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { generateLocalHtml } from "./api/localGenerator";
 
-const INITIAL_CREDIT  = 200;
-const COST_GENERATE   = 80;
-const COST_REGENERATE = 30;
-const COST_AI_IMAGE   = 20;
-const COST_TEXT_EDIT   = 5;
-const COST_INLINE_EDIT = 3;
+const INITIAL_CREDIT  = 9999;
+const COST_GENERATE   = 0;
+const COST_REGENERATE = 0;
+const COST_AI_IMAGE   = 0;
+const COST_TEXT_EDIT   = 0;
+const COST_INLINE_EDIT = 0;
 
 // ── 업종별 자동 프리셋 (아임웹 시각 클러스터 반영) ──────────
 const INDUSTRY_PRESETS = {
@@ -864,31 +865,33 @@ export default function LumenWebBuilder() {
       "✅ 인테이크 폼 분석 중...",
       "✅ 이미지 처리 (로고:" + (logo?"✓":"✗") + " 히어로:" + (hero?"✓":"✗") + " 제품:" + products.length + "장)",
       "✅ " + (form.selectedTheme ? form.selectedTheme.name + " 테마 + " : "") + (ILLUST_STYLES.find(s => s.id === form.illustStyle)||{}).label + " 적용 중...",
-      "✅ Gamma 디자인 시스템 기반 카드 구조 생성 중...",
-      "✅ HTML · CSS · SVG 코드 생성 중...",
+      "✅ 로컬 템플릿 엔진으로 카드 구조 생성 중...",
+      "✅ HTML · CSS 코드 생성 중...",
       "✅ CTA 삽입 및 반응형 최적화 중...",
       "✅ 최종 검수 및 마무리 중...",
       "✅ 완성!",
     ];
     const LOG_THRESHOLDS = [3, 10, 20, 35, 55, 72, 88];
     for (let i = 0; i < 2; i++) { await new Promise(r => setTimeout(r, 500)); setGenLog(prev => [...prev, LOG_MSGS[i]]); setProgress(LOG_THRESHOLDS[i]); }
-    let apiDone = false, apiResult = null, apiError = null, currentPct = 10;
+    let currentPct = 10;
     try {
-      const content = buildPrompt(form, extra);
-      const apiPromise = callClaude([{ role:"user", content }]);
-      apiPromise.then(r => { apiResult = r; apiDone = true; }).catch(e => { apiError = e; apiDone = true; });
       let nextLogIdx = 2;
       await new Promise((resolve) => {
         const iv = setInterval(() => {
-          if (apiDone) { clearInterval(iv); resolve(); return; }
           const remaining = 92 - currentPct;
-          currentPct = Math.min(92, currentPct + Math.max(0.3, remaining * 0.035));
+          currentPct = Math.min(92, currentPct + Math.max(0.6, remaining * 0.09));
           setProgress(Math.round(currentPct));
-          if (nextLogIdx < LOG_THRESHOLDS.length && currentPct >= LOG_THRESHOLDS[nextLogIdx]) { setGenLog(prev => [...prev, LOG_MSGS[nextLogIdx]]); nextLogIdx++; }
-        }, 300);
+          if (nextLogIdx < LOG_THRESHOLDS.length && currentPct >= LOG_THRESHOLDS[nextLogIdx]) {
+            setGenLog(prev => [...prev, LOG_MSGS[nextLogIdx]]);
+            nextLogIdx++;
+          }
+          if (currentPct >= 92) {
+            clearInterval(iv);
+            resolve();
+          }
+        }, 140);
       });
-      if (apiError) throw apiError;
-      const final = injectImages(apiResult, form.uploadedImages);
+      const final = generateLocalHtml(form, { extra });
       for (let i = nextLogIdx; i < LOG_THRESHOLDS.length; i++) setGenLog(prev => [...prev, LOG_MSGS[i]]);
       setProgress(95); await new Promise(r => setTimeout(r, 300));
       setProgress(100); setGenLog(prev => [...prev, LOG_MSGS[LOG_MSGS.length - 1]]);
@@ -1203,7 +1206,7 @@ export default function LumenWebBuilder() {
           <div style={{ fontWeight:600, fontSize:17, color:"#1E293B", letterSpacing:"-0.4px" }}>루멘<span style={{ color:"#2563EB" }}> 웹 빌더</span></div>
           <div style={{ display:"flex", alignItems:"center", gap:8 }}>
             {form.selectedTheme && <div style={{ fontSize:11, fontWeight:500, background:tc + "22", color:tc, border:"1px solid " + tc + "44", borderRadius:20, padding:"4px 10px" }}>{form.selectedTheme.name}</div>}
-            <div style={{ fontSize:11, color:"#16A34A", fontWeight:500, background:"#F0FDF4", border:"1px solid #BBF7D0", borderRadius:20, padding:"4px 10px" }}>🔗 서버 연결됨</div>
+            <div style={{ fontSize:11, color:"#16A34A", fontWeight:500, background:"#F0FDF4", border:"1px solid #BBF7D0", borderRadius:20, padding:"4px 10px" }}>🆓 로컬 템플릿 모드</div>
             <CreditBadge credit={credit} />
           </div>
         </div>
@@ -1320,13 +1323,13 @@ export default function LumenWebBuilder() {
                 ))}
               </div>
             </div>
-            <RightPanel
-              credit={credit} setCredit={setCredit} form={form}
-              resultHtml={resultHtml} setResultHtml={setResultHtml}
-              appliedFeatures={appliedFeatures} setAppliedFeatures={setApplied}
-              currentImages={curImages} setCurrentImages={setCurImages}
-              apiKey={apiKey} openApiKeyModal={() => setShowModal(true)}
-            />
+            <div style={{ background:"#fff", border:"1px solid #E2E8F0", borderRadius:12, padding:16 }}>
+              <div style={{ fontSize:14, fontWeight:700, color:"#1E293B", marginBottom:8 }}>🆓 무료 로컬 모드 안내</div>
+              <div style={{ fontSize:12, color:"#64748B", lineHeight:1.7 }}>
+                현재는 API 비용 없이 동작하도록 로컬 템플릿 생성기로 전환되어 있습니다.<br/>
+                업종/테마/입력값에 맞춘 템플릿이 즉시 생성되며, HTML 다운로드 후 바로 사용 가능합니다.
+              </div>
+            </div>
           </div>
         </div>
       </div>
