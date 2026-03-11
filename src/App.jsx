@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { generateLocalHtml } from "./api/localGenerator";
+import benchmarkCards from "../data/benchmark_cards.json";
 
 const INITIAL_CREDIT  = 9999;
 const COST_GENERATE   = 0;
@@ -826,7 +827,7 @@ export default function LumenWebBuilder() {
   const previewSrc = editMode ? makeEditableHtml(resultHtml) : resultHtml;
 
   const [form, setForm] = useState({
-    company:"", industry:"", businessMode:"auto", description:"", services:"", ceo:"",
+    company:"", industry:"", businessMode:"auto", benchmarkSiteUrl:"", benchmarkSiteName:"", description:"", services:"", ceo:"",
     purpose:[], target:"", pages:[],
     selectedTheme:null, mood:"", color:"",
     illustStyle:"flat",
@@ -929,6 +930,11 @@ export default function LumenWebBuilder() {
   const chip = on => ({ display:"inline-flex", alignItems:"center", padding:"7px 13px", borderRadius:20, fontSize:12, cursor:"pointer", margin:3, border:"1.5px solid " + (on ? "#2563EB" : "#E2E8F0"), background: on ? "#EFF6FF" : "rgba(255,255,255,0.7)", color: on ? "#2563EB" : "#64748B", transition:"all .15s" });
   const FLD  = { marginBottom:16 };
 
+  const recommendedBenchmarks = benchmarkCards
+    .filter((c) => !form.industry || (c.industry_vertical || "").includes(form.industry.split("/")[0]))
+    .filter((c) => form.businessMode === "auto" || c.business_mode === form.businessMode)
+    .slice(0, 6);
+
   const Hdr = () => (
     <div style={HDR}>
       <div style={{ fontWeight:600, fontSize:17, color:"#1E293B", letterSpacing:"-0.4px" }}>루멘<span style={{ color:"#2563EB" }}> 웹 빌더</span></div>
@@ -1016,6 +1022,21 @@ export default function LumenWebBuilder() {
                     {form.businessMode === m ? "✓ " : ""}{m === "auto" ? "자동 추천" : m}
                   </span>
                 ))}
+              </div>
+            </div>
+            <div style={FLD}>
+              <label style={LBL}>추천 레퍼런스 템플릿 (자동 누적 데이터 반영)</label>
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
+                {recommendedBenchmarks.map((b) => {
+                  const on = form.benchmarkSiteUrl === b.site_url;
+                  return (
+                    <button key={b.site_url} onClick={() => setForm(f => ({ ...f, benchmarkSiteUrl: b.site_url, benchmarkSiteName: b.site_name }))}
+                      style={{ textAlign:"left", padding:"10px 11px", borderRadius:10, border:"1.5px solid " + (on ? "#2563EB" : "#E2E8F0"), background:on?"#EFF6FF":"#fff", cursor:"pointer" }}>
+                      <div style={{ fontSize:12, fontWeight:600, color:on?"#2563EB":"#1E293B" }}>{b.site_name}</div>
+                      <div style={{ fontSize:10, color:"#64748B", marginTop:2 }}>{b.business_mode} · {b.industry_vertical}</div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
             <div style={FLD}>
@@ -1127,6 +1148,7 @@ export default function LumenWebBuilder() {
                 <strong>{form.company || "(상호명)"}</strong> · {form.industry}<br />
                 테마: {form.selectedTheme ? form.selectedTheme.name : "자동"} · 모드: {form.businessMode === "auto" ? "자동 추천" : form.businessMode} · 톤: {(INTRO_TONES.find(t => t.id === form.introTone) || {}).label}<br />
                 구성: {form.pages.map(id => (PAGE_OPTIONS.find(p => p.id === id) || {}).label).join(", ")}<br />
+                {form.benchmarkSiteName ? "🧩 레퍼런스: " + form.benchmarkSiteName + "  " : ""}
                 {form.kakaoId ? "💬 @" + form.kakaoId + "  " : ""}{form.naverUrl ? "📅 네이버예약  " : ""}
                 {form.uploadedImages.logo ? "🏷️ 로고  " : ""}{form.uploadedImages.hero ? "🖼️ 히어로  " : ""}
                 {form.uploadedImages.products.length > 0 ? "📦 제품 " + form.uploadedImages.products.length + "장" : ""}

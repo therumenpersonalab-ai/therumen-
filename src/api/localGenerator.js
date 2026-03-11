@@ -218,6 +218,7 @@ export function generateLocalHtml(form, options = {}) {
   const mode = inferBusinessMode(form);
   const mood = inferMood(form.industry || "");
   const desc = escapeHtml(form.description || `${company}는 ${industry} 분야의 전문 서비스를 제공합니다.`);
+  const benchmark = form.benchmarkSiteName ? `${escapeHtml(form.benchmarkSiteName)} 레퍼런스 기반` : "업종 레퍼런스 기반";
   const services = (form.services || "맞춤 전략, 실행 지원, 운영 개선, 빠른 대응")
     .split(",")
     .map((s) => s.trim())
@@ -292,7 +293,7 @@ footer{padding:36px 0;background:#0F172A;color:#cbd5e1}
 <body>
 <div class="utility">무료 로컬 템플릿 모드 · 업종+운영목적 기반 자동 생성</div>
 <nav><div class="container nav-wrap"><div class="logo">${logo ? `<img src="${logo}" alt="logo" style="height:34px"/>` : company}</div><div class="menu"><span>업종: ${industry}</span><span>모드: ${mode}</span><span>테마: ${escapeHtml(t.name || "기본")}</span></div><a href="#contact" class="btn" style="padding:10px 16px">문의하기</a></div></nav>
-<header class="hero ${heroLayout === "center" ? "center" : ""}"><div class="container hero-grid"><div><div class="badge">${mode} 템플릿</div><h1>${company}<br/>${industry} 맞춤 웹페이지</h1><p>${desc}</p><a class="btn" href="#contact">${ctaText}</a></div>${heroLayout === "split" ? `<img class="hero-img" src="${heroImage}" alt="hero"/>` : ""}</div></header>
+<header class="hero ${heroLayout === "center" ? "center" : ""}"><div class="container hero-grid"><div><div class="badge">${mode} 템플릿 · ${benchmark}</div><h1>${company}<br/>${industry} 맞춤 웹페이지</h1><p>${desc}</p><a class="btn" href="#contact">${ctaText}</a></div>${heroLayout === "split" ? `<img class="hero-img" src="${heroImage}" alt="hero"/>` : ""}</div></header>
 <section id="structure"><div class="container"><h2>${sectionTitle(mode)}</h2><p class="lead">업종(${industry}) + 운영목적(${mode}) 조합을 기반으로 실제 사례 패턴을 반영해 템플릿을 자동 구성했습니다.</p></div></section>
 ${sections}
 <footer><div class="container"><div style="font-weight:700;margin-bottom:8px">${company}</div><div>전화: ${escapeHtml(form.phone || "미입력")} · 이메일: ${escapeHtml(form.email || "미입력")} · 주소: ${escapeHtml(form.address || "미입력")}</div><div style="margin-top:8px;font-size:13px;opacity:.8">© ${new Date().getFullYear()} ${company}. All rights reserved.</div></div></footer>
