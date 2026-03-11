@@ -1,0 +1,18 @@
+{
+  "rules": [
+    "split-layout -> single-column when <= 900px",
+    "navbar collapse into drawer when <= 1024px",
+    "3-column grids -> 2-column <= 900px -> 1-column <= 640px",
+    "hero cta row -> vertical stack <= 480px",
+    "utility-bar keeps max 2 lines on mobile",
+    "review/qna stacks render one card per row",
+    "project-category chips become horizontal scroll"
+  ],
+  "priority_reorder": [
+    "hero",
+    "primary-cta",
+    "key-benefits",
+    "proof/reviews",
+    "contact"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "project_type": "free-website-generator-upgrade",
+  "axis": {
+    "business_mode": ["판매형", "소개/문의형", "포트폴리오형", "예약형", "콘텐츠형", "커뮤니티형", "행사/프로모션형"],
+    "industry_vertical": ["인테리어/건축", "패션/잡화", "뷰티", "기업/비즈니스", "블로그/기타", "취미/생활", "푸드", "음식점/카페", "동물/식물", "교육/컨설팅", "결혼/행사", "IT/가전", "예술/디자인", "프로모션/랜딩", "종교/커뮤니티", "숙박/여행", "병원/케어"]
+  },
+  "sections": [
+    "hero(url-input + industry chips + primary CTA)",
+    "industry selector",
+    "business mode selector",
+    "benchmark gallery",
+    "generated preview (desktop/mobile)",
+    "advanced modules",
+    "faq/trust",
+    "final cta"
+  ]
+}

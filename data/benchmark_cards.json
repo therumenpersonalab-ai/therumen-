@@ -1,0 +1,66 @@
+[
+  {
+    "site_name": "사호 Saho",
+    "site_url": "https://info64651.imweb.me/",
+    "industry_vertical": "패션/잡화",
+    "business_mode": "판매형",
+    "key_modules": ["brand-story", "shop-categories", "contact", "cart", "login"],
+    "visual_mood": "minimal-premium"
+  },
+  {
+    "site_name": "OUSQUE",
+    "site_url": "https://ousque-showroom.imweb.me/",
+    "industry_vertical": "패션/잡화",
+    "business_mode": "판매형",
+    "key_modules": ["archive-board", "notice-board", "site-search", "language-toggle"],
+    "visual_mood": "editorial"
+  },
+  {
+    "site_name": "프락시스룸",
+    "site_url": "https://praxisroom.imweb.me/",
+    "industry_vertical": "예술/디자인",
+    "business_mode": "포트폴리오형",
+    "key_modules": ["visual-first-hero", "roomtour", "qna", "notice"],
+    "visual_mood": "image-immersive"
+  },
+  {
+    "site_name": "디자인청춘",
+    "site_url": "https://designcheongchun.imweb.me/",
+    "industry_vertical": "인테리어/건축",
+    "business_mode": "포트폴리오형",
+    "key_modules": ["project-category-grid", "case-grid", "inquiry-cta"],
+    "visual_mood": "minimal-editorial"
+  },
+  {
+    "site_name": "제로투히어로",
+    "site_url": "https://testo.imweb.me/",
+    "industry_vertical": "취미/생활",
+    "business_mode": "판매형",
+    "key_modules": ["utility-bar", "time-sale", "promotion-badge", "brand-story"],
+    "visual_mood": "bold-d2c"
+  },
+  {
+    "site_name": "ITHACA",
+    "site_url": "https://ithaca.imweb.me/",
+    "industry_vertical": "IT/가전",
+    "business_mode": "판매형",
+    "key_modules": ["brand", "product", "editorial-picks", "support-pack", "instagram-feed"],
+    "visual_mood": "lifestyle-magazine"
+  },
+  {
+    "site_name": "완스파파",
+    "site_url": "https://wanspapa.imweb.me/",
+    "industry_vertical": "동물/식물",
+    "business_mode": "판매형",
+    "key_modules": ["faq", "reviews", "qna", "event", "trust-stack"],
+    "visual_mood": "friendly-trust"
+  },
+  {
+    "site_name": "Fastdesign",
+    "site_url": "https://fast-design.imweb.me/",
+    "industry_vertical": "인테리어/건축",
+    "business_mode": "콘텐츠형",
+    "key_modules": ["filter-first-marketplace", "resource-pack", "category-filter"],
+    "visual_mood": "corporate-tooling"
+  }
+]
