@@ -957,6 +957,7 @@ export default function LumenWebBuilder() {
   const [resultHtml, setResultHtml]   = useState("");
   const [curImages, setCurImages]     = useState({ logo:null, hero:null, products:[] });
   const [accountTab, setAccountTab]   = useState('account');
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   const [viewport, setViewport]       = useState("desktop");
   const [editMode, setEditMode]       = useState(false);
@@ -1441,16 +1442,17 @@ export default function LumenWebBuilder() {
               <div style={{ display:'flex', gap:8, marginBottom:8 }}>
                 <button style={{ ...BTNS, flex:1, background: authMode==='login' ? '#EFF6FF' : '#fff' }} onClick={() => setAuthMode('login')}>로그인</button>
                 <button style={{ ...BTNS, flex:1, background: authMode==='signup' ? '#EFF6FF' : '#fff' }} onClick={() => setAuthMode('signup')}>회원가입</button>
+                <button style={{ ...BTNS, flex:1, background: authMode==='forgot' ? '#EFF6FF' : '#fff' }} onClick={() => setAuthMode('forgot')}>비번찾기</button>
               </div>
 
               {authMode === 'signup' && <input style={{ ...INP, marginBottom:8 }} placeholder='이름' value={authForm.name} onChange={e => setAuthForm(f => ({...f, name:e.target.value}))} />}
 
               <div style={{ display:'flex', gap:8, marginBottom:6 }}>
                 <input style={{ ...INP, marginBottom:0, flex:1 }} placeholder='이메일' value={authForm.email} onChange={e => setAuthForm(f => ({...f, email:e.target.value}))} />
-                {authMode === 'signup' && (
+                {(authMode === 'signup' || authMode === 'forgot') && (
                   <button
                     style={{ ...BTNS, whiteSpace:'nowrap' }}
-                    onClick={() => checkEmailBeforeCode('signup')}
+                    onClick={() => checkEmailBeforeCode(authMode === 'signup' ? 'signup' : 'reset')}
                     disabled={checkingEmail}
                   >
                     {checkingEmail ? '확인중...' : '이메일 확인'}
@@ -1458,25 +1460,29 @@ export default function LumenWebBuilder() {
                 )}
               </div>
 
-              {authMode === 'signup' && emailChecked && (
+              {(authMode === 'signup' || authMode === 'forgot') && emailChecked && (
                 <div style={{ marginBottom:8, fontSize:11, color: emailCheckOk ? '#15803D' : '#DC2626' }}>
                   {emailCheckOk ? '✅ ' : '❌ '}{emailCheckMsg}
                 </div>
               )}
 
-              {authMode === 'signup' && (
+              {(authMode === 'signup' || authMode === 'forgot') && (
                 <div style={{ display:'flex', gap:8, marginBottom:8 }}>
                   <input style={{ ...INP, marginBottom:0, flex:1 }} placeholder='이메일 인증코드 6자리' value={authForm.code} onChange={e => setAuthForm(f => ({...f, code:e.target.value}))} />
-                  <button style={{ ...BTNS, whiteSpace:'nowrap' }} onClick={() => sendAuthCode('signup')} disabled={codeSending || !emailCheckOk}>
+                  <button style={{ ...BTNS, whiteSpace:'nowrap' }} onClick={() => sendAuthCode(authMode === 'signup' ? 'signup' : 'reset')} disabled={codeSending || !emailCheckOk}>
                     {codeSending ? '발송중...' : '코드발송'}
                   </button>
                 </div>
               )}
 
-              <input type='password' style={{ ...INP, marginBottom:8 }} placeholder='비밀번호(8자 이상)' value={authForm.password} onChange={e => setAuthForm(f => ({...f, password:e.target.value}))} />
+              {authMode === 'forgot' ? (
+                <input type='password' style={{ ...INP, marginBottom:8 }} placeholder='새 비밀번호(8자 이상)' value={authForm.newPassword} onChange={e => setAuthForm(f => ({...f, newPassword:e.target.value}))} />
+              ) : (
+                <input type='password' style={{ ...INP, marginBottom:8 }} placeholder='비밀번호(8자 이상)' value={authForm.password} onChange={e => setAuthForm(f => ({...f, password:e.target.value}))} />
+              )}
 
               <button style={BTNP} onClick={submitAuth} disabled={authLoading}>
-                {authLoading ? '처리 중...' : (authMode === 'signup' ? '이메일 인증 후 회원가입' : '로그인 후 시작')}
+                {authLoading ? '처리 중...' : (authMode === 'signup' ? '이메일 인증 후 회원가입' : authMode === 'forgot' ? '비밀번호 재설정' : '로그인 후 시작')}
               </button>
             </div>
           ) : (
@@ -1908,7 +1914,7 @@ export default function LumenWebBuilder() {
                   <div style={{ fontSize:12, color:"#64748B", lineHeight:1.7, marginBottom:10 }}>
                     {me?.role === 'admin' ? '관리자 계정: 템플릿 생성 무제한' : `현재 크레딧: ${credit}C`}
                   </div>
-                  <ChangePasswordBox authToken={authToken} />
+                  <button onClick={() => setShowPasswordModal(true)} style={{ marginTop:10, width:'100%', padding:'9px 10px', borderRadius:8, border:'1px solid #DBEAFE', background:'#EFF6FF', color:'#1D4ED8', cursor:'pointer', fontWeight:600 }}>비밀번호 변경</button>
                   <button onClick={() => { localStorage.removeItem('lumen_token'); setAuthToken(''); setMe(null); setStep('intro'); setAccountTab('account'); }} style={{ marginTop:10, width:'100%', padding:'9px 10px', borderRadius:8, border:'1px solid #E2E8F0', background:'#fff', cursor:'pointer' }}>로그아웃</button>
                 </>
               )}
@@ -1923,6 +1929,18 @@ export default function LumenWebBuilder() {
               )}
             </div>
           </div>
+
+          {showPasswordModal && (
+            <div style={{ position:'fixed', inset:0, background:'rgba(15,23,42,0.55)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999, padding:16 }}>
+              <div style={{ width:'100%', maxWidth:420, background:'#fff', borderRadius:12, border:'1px solid #E2E8F0', boxShadow:'0 20px 40px rgba(0,0,0,0.2)', padding:14 }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
+                  <div style={{ fontSize:14, fontWeight:700, color:'#1E293B' }}>비밀번호 변경</div>
+                  <button onClick={() => setShowPasswordModal(false)} style={{ border:'none', background:'transparent', fontSize:18, cursor:'pointer', color:'#64748B' }}>×</button>
+                </div>
+                <ChangePasswordBox authToken={authToken} />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
