@@ -1895,6 +1895,10 @@ export default function LumenWebBuilder() {
               consumeCredit={consumeCredit}
             />
             <div style={{ background:"#fff", border:"1px solid #E2E8F0", borderRadius:12, padding:16 }}>
+              <div style={{ display:'flex', gap:8, marginBottom:10 }}>
+                <button onClick={() => setShowPasswordModal(true)} style={{ flex:1, padding:'9px 10px', borderRadius:8, border:'1px solid #DBEAFE', background:'#EFF6FF', color:'#1D4ED8', cursor:'pointer', fontWeight:600 }}>비밀번호 변경</button>
+                <button onClick={() => { localStorage.removeItem('lumen_token'); setAuthToken(''); setMe(null); setStep('intro'); setAccountTab('account'); }} style={{ flex:1, padding:'9px 10px', borderRadius:8, border:'1px solid #E2E8F0', background:'#fff', cursor:'pointer' }}>로그아웃</button>
+              </div>
               <div style={{ display:'flex', gap:6, marginBottom:10 }}>
                 <button
                   onClick={() => setAccountTab('account')}
@@ -1914,10 +1918,7 @@ export default function LumenWebBuilder() {
                   <div style={{ fontSize:12, color:"#64748B", lineHeight:1.7, marginBottom:10 }}>
                     {me?.role === 'admin' ? '관리자 계정: 템플릿 생성 무제한' : `현재 크레딧: ${credit}C`}
                   </div>
-                  <div style={{ display:'flex', gap:8, marginTop:10 }}>
-                    <button onClick={() => setShowPasswordModal(true)} style={{ flex:1, padding:'9px 10px', borderRadius:8, border:'1px solid #DBEAFE', background:'#EFF6FF', color:'#1D4ED8', cursor:'pointer', fontWeight:600 }}>비밀번호 변경</button>
-                    <button onClick={() => { localStorage.removeItem('lumen_token'); setAuthToken(''); setMe(null); setStep('intro'); setAccountTab('account'); }} style={{ flex:1, padding:'9px 10px', borderRadius:8, border:'1px solid #E2E8F0', background:'#fff', cursor:'pointer' }}>로그아웃</button>
-                  </div>
+
                 </>
               )}
 
