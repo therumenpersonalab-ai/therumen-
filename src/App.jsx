@@ -510,6 +510,40 @@ function CreditBadge({ credit }) {
   );
 }
 
+function ChangePasswordBox({ authToken }) {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const submit = async () => {
+    setLoading(true);
+    try {
+      const r = await fetch('/api/auth-change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || '비밀번호 변경 실패');
+      alert('비밀번호가 변경되었습니다. 다음 로그인부터 적용됩니다.');
+      setCurrentPassword('');
+      setNewPassword('');
+    } catch (e) {
+      alert(e.message || '비밀번호 변경 실패');
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div style={{ border:'1px solid #E2E8F0', borderRadius:10, padding:10, marginTop:10 }}>
+      <div style={{ fontSize:12, fontWeight:700, marginBottom:6 }}>비밀번호 변경</div>
+      <input type='password' style={{ width:'100%', padding:8, border:'1px solid #E2E8F0', borderRadius:8, marginBottom:6 }} placeholder='현재 비밀번호' value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} />
+      <input type='password' style={{ width:'100%', padding:8, border:'1px solid #E2E8F0', borderRadius:8, marginBottom:6 }} placeholder='새 비밀번호(8자 이상)' value={newPassword} onChange={e => setNewPassword(e.target.value)} />
+      <button onClick={submit} disabled={loading || !currentPassword || !newPassword} style={{ width:'100%', padding:8, border:'none', borderRadius:8, background:'#334155', color:'#fff', cursor:'pointer' }}>{loading ? '변경 중...' : '비밀번호 변경'}</button>
+    </div>
+  );
+}
+
 function AdminTransferBox({ authToken, onDone }) {
   const [targetEmail, setTargetEmail] = useState('');
   const [amount, setAmount] = useState('100');
@@ -1847,6 +1881,7 @@ export default function LumenWebBuilder() {
                   <div style={{ fontSize:12, color:"#64748B", lineHeight:1.7, marginBottom:10 }}>
                     {me?.role === 'admin' ? '관리자 계정: 템플릿 생성 무제한' : `현재 크레딧: ${credit}C`}
                   </div>
+                  <ChangePasswordBox authToken={authToken} />
                   <button onClick={() => { localStorage.removeItem('lumen_token'); setAuthToken(''); setMe(null); setStep('intro'); setAccountTab('account'); }} style={{ marginTop:10, width:'100%', padding:'9px 10px', borderRadius:8, border:'1px solid #E2E8F0', background:'#fff', cursor:'pointer' }}>로그아웃</button>
                 </>
               )}
