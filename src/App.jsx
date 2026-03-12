@@ -958,6 +958,7 @@ export default function LumenWebBuilder() {
   const [curImages, setCurImages]     = useState({ logo:null, hero:null, products:[] });
   const [accountTab, setAccountTab]   = useState('account');
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showAdminModal, setShowAdminModal] = useState(false);
 
   const [viewport, setViewport]       = useState("desktop");
   const [editMode, setEditMode]       = useState(false);
@@ -1785,13 +1786,19 @@ export default function LumenWebBuilder() {
                 style={{ padding:"8px 14px", borderRadius:8, border:"none", background:"#fff", color:tc, fontSize:11, fontWeight:600, cursor:"pointer" }}>💾 HTML 다운로드</button>
               {me && (
                 <>
+                  <div style={{ padding:"8px 12px", borderRadius:8, border:"1.5px solid rgba(255,255,255,.4)", background:"rgba(255,255,255,.12)", color:"#fff", fontSize:11, fontWeight:600 }}>
+                    {me.email} · {me.role === 'admin' ? '관리자' : `크레딧 ${credit}C`}
+                  </div>
+                  {me?.role === 'admin' && (
+                    <button onClick={() => setShowAdminModal(true)} style={{ padding:"8px 14px", borderRadius:8, border:"1.5px solid rgba(255,255,255,.4)", background:"rgba(255,255,255,.12)", color:"#fff", fontSize:11, fontWeight:600, cursor:"pointer" }}>관리자 모드</button>
+                  )}
                   <button onClick={() => setShowPasswordModal(true)} style={{ padding:"8px 14px", borderRadius:8, border:"1.5px solid rgba(255,255,255,.4)", background:"rgba(255,255,255,.12)", color:"#fff", fontSize:11, fontWeight:600, cursor:"pointer" }}>🔐 비밀번호 변경</button>
                   <button onClick={() => { localStorage.removeItem('lumen_token'); setAuthToken(''); setMe(null); setStep('intro'); setAccountTab('account'); }} style={{ padding:"8px 14px", borderRadius:8, border:"1.5px solid rgba(255,255,255,.4)", background:"rgba(255,255,255,.12)", color:"#fff", fontSize:11, fontWeight:600, cursor:"pointer" }}>↩ 로그아웃</button>
                 </>
               )}
             </div>
           </div>
-          <div style={{ display:"grid", gridTemplateColumns:"minmax(0,1fr) 290px 290px", gap:12, alignItems:"start" }}>
+          <div style={{ display:"grid", gridTemplateColumns:"minmax(0,1fr) 300px", gap:12, alignItems:"start" }}>
             <div>
               {/* 인라인 편집 컨트롤 */}
               <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10, padding:"10px 14px", background: editMode ? "linear-gradient(135deg,#EEF2FF,#F0F9FF)" : "#fff", borderRadius:12, border: editMode ? "1.5px solid #2563EB" : "1px solid #E2E8F0" }}>
@@ -1900,40 +1907,21 @@ export default function LumenWebBuilder() {
               openApiKeyModal={() => {}}
               consumeCredit={consumeCredit}
             />
-            <div style={{ background:"#fff", border:"1px solid #E2E8F0", borderRadius:12, padding:16 }}>
-              <div style={{ display:'flex', gap:6, marginBottom:10 }}>
-                <button
-                  onClick={() => setAccountTab('account')}
-                  style={{ flex:1, padding:'7px 8px', borderRadius:8, border:'1px solid #E2E8F0', background:accountTab==='account' ? '#EFF6FF' : '#fff', cursor:'pointer', fontSize:12 }}
-                >계정</button>
-                {me?.role === 'admin' && (
-                  <button
-                    onClick={() => setAccountTab('admin')}
-                    style={{ flex:1, padding:'7px 8px', borderRadius:8, border:'1px solid #E2E8F0', background:accountTab==='admin' ? '#EFF6FF' : '#fff', cursor:'pointer', fontSize:12 }}
-                  >관리자 탭</button>
-                )}
-              </div>
 
-              {(accountTab === 'account' || me?.role !== 'admin') && (
-                <>
-                  <div style={{ fontSize:14, fontWeight:700, color:"#1E293B", marginBottom:8 }}>계정/크레딧</div>
-                  <div style={{ fontSize:12, color:"#64748B", lineHeight:1.7, marginBottom:10 }}>
-                    {me?.role === 'admin' ? '관리자 계정: 템플릿 생성 무제한' : `현재 크레딧: ${credit}C`}
-                  </div>
-
-                </>
-              )}
-
-              {me?.role === 'admin' && accountTab === 'admin' && (
-                <>
-                  <div style={{ fontSize:14, fontWeight:700, color:'#1E293B', marginBottom:8 }}>관리자 모드</div>
-                  <div style={{ fontSize:12, color:'#64748B', marginBottom:8 }}>가입 계정 관리 및 크레딧 지급</div>
-                  <AdminTransferBox authToken={authToken} onDone={() => fetchMe(authToken)} />
-                  <AdminUsersPanel authToken={authToken} />
-                </>
-              )}
-            </div>
           </div>
+
+          {showAdminModal && me?.role === 'admin' && (
+            <div style={{ position:'fixed', inset:0, background:'rgba(15,23,42,0.55)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999, padding:16 }}>
+              <div style={{ width:'100%', maxWidth:520, background:'#fff', borderRadius:12, border:'1px solid #E2E8F0', boxShadow:'0 20px 40px rgba(0,0,0,0.2)', padding:14, maxHeight:'80vh', overflow:'auto' }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
+                  <div style={{ fontSize:14, fontWeight:700, color:'#1E293B' }}>관리자 모드</div>
+                  <button onClick={() => setShowAdminModal(false)} style={{ border:'none', background:'transparent', fontSize:18, cursor:'pointer', color:'#64748B' }}>×</button>
+                </div>
+                <AdminTransferBox authToken={authToken} onDone={() => fetchMe(authToken)} />
+                <AdminUsersPanel authToken={authToken} />
+              </div>
+            </div>
+          )}
 
           {showPasswordModal && (
             <div style={{ position:'fixed', inset:0, background:'rgba(15,23,42,0.55)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999, padding:16 }}>
