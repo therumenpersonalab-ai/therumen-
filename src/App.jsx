@@ -850,7 +850,7 @@ export default function LumenWebBuilder() {
   const [authToken, setAuthToken]     = useState(() => localStorage.getItem("lumen_token") || "");
   const [me, setMe]                   = useState(null);
   const [authMode, setAuthMode]       = useState("login");
-  const [authForm, setAuthForm]       = useState({ email:"", password:"", name:"", code:"", newPassword:"" });
+  const [authForm, setAuthForm]       = useState({ email:"", password:"", name:"", code:"", newPassword:"", signupCodeToken:"", resetCodeToken:"" });
   const [authLoading, setAuthLoading] = useState(false);
   const [codeSending, setCodeSending] = useState(false);
 
@@ -937,6 +937,11 @@ export default function LumenWebBuilder() {
       let d = {};
       try { d = raw ? JSON.parse(raw) : {}; } catch { d = { error: raw?.slice(0, 180) || '서버 응답 파싱 실패' }; }
       if (!r.ok) throw new Error(d.error || '인증코드 발송 실패');
+      setAuthForm(f => ({
+        ...f,
+        signupCodeToken: purpose === 'signup' ? (d.codeToken || '') : f.signupCodeToken,
+        resetCodeToken: purpose === 'reset' ? (d.codeToken || '') : f.resetCodeToken,
+      }));
       if (d?.skipped) {
         alert('메일 서버 설정이 없어 실제 발송은 생략되었습니다. (SMTP 설정 필요)');
       } else {
@@ -955,7 +960,7 @@ export default function LumenWebBuilder() {
         const r = await fetch('/api/auth-reset-password', {
           method:'POST',
           headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ email: authForm.email, code: authForm.code, newPassword: authForm.newPassword }),
+          body: JSON.stringify({ email: authForm.email, code: authForm.code, newPassword: authForm.newPassword, codeToken: authForm.resetCodeToken }),
         });
         const d = await r.json();
         if (!r.ok) throw new Error(d.error || '비밀번호 변경 실패');
@@ -967,7 +972,7 @@ export default function LumenWebBuilder() {
 
       const endpoint = authMode === 'signup' ? '/api/auth-signup' : '/api/auth-login';
       const payload = authMode === 'signup'
-        ? { email: authForm.email, password: authForm.password, name: authForm.name, code: authForm.code }
+        ? { email: authForm.email, password: authForm.password, name: authForm.name, code: authForm.code, codeToken: authForm.signupCodeToken }
         : { email: authForm.email, password: authForm.password };
       const r = await fetch(endpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
       const raw = await r.text();

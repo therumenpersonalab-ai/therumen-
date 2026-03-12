@@ -10,12 +10,12 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   try {
     await initDb();
-    const { email, name, password, code } = req.body || {};
+    const { email, name, password, code, codeToken } = req.body || {};
     if (!email || !name || !password || !code) return res.status(400).json({ error: '필수값 누락' });
     if (String(password).length < 8) return res.status(400).json({ error: '비밀번호 8자 이상' });
 
     const normalized = String(email).toLowerCase().trim();
-    const codeOk = await verifyCode(normalized, 'signup', code);
+    const codeOk = await verifyCode(normalized, 'signup', code, codeToken);
     if (!codeOk) return res.status(400).json({ error: '이메일 인증코드가 올바르지 않거나 만료되었습니다.' });
 
     const exists = await pool.query('SELECT id FROM users WHERE email=$1', [normalized]);
