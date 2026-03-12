@@ -48,6 +48,33 @@ const INTRO_TONES = [
 
 const INDUSTRIES = ["음식/카페","뷰티/미용","의료/헬스","교육/학원","IT/소프트웨어","제조/생산","법무/세무/컨설팅","쇼핑/이커머스","부동산","여행/숙박","반려동물","기타"];
 
+const INDUSTRY_TEMPLATE_MATCH = {
+  "음식/카페": ["식품", "카페", "요식", "푸드", "라이프"],
+  "뷰티/미용": ["뷰티", "패션", "디자인"],
+  "의료/헬스": ["의료", "헬스", "건강"],
+  "교육/학원": ["교육", "학원", "기업"],
+  "IT/소프트웨어": ["IT", "가전", "기업", "비즈니스"],
+  "제조/생산": ["기업", "비즈니스", "인테리어", "건축"],
+  "법무/세무/컨설팅": ["기업", "비즈니스", "컨설팅"],
+  "쇼핑/이커머스": ["패션", "잡화", "식품", "동물", "식물", "IT"],
+  "부동산": ["인테리어", "건축", "기업", "비즈니스"],
+  "여행/숙박": ["여행", "숙박", "생활", "취미"],
+  "반려동물": ["동물", "식물", "생활"],
+  "기타": [],
+};
+
+const MOOD_LABELS = {
+  editorial: "감성 에디토리얼 무드",
+  "minimal-premium": "프리미엄 미니멀 무드",
+  "image-immersive": "이미지 몰입형 무드",
+  "minimal-editorial": "정돈된 미니멀 무드",
+  "bold-d2c": "강한 D2C 세일즈 무드",
+  "lifestyle-magazine": "라이프스타일 매거진 무드",
+  "friendly-trust": "친근·신뢰형 무드",
+  "corporate-tooling": "코퍼레이트 툴형 무드",
+  "auto-derived": "균형형 비즈니스 무드",
+};
+
 const PURPOSE_OPTIONS = [
   { id:"info",      label:"📋 정보 제공",   desc:"메뉴·위치·영업시간" },
   { id:"booking",   label:"📅 예약·문의",   desc:"온라인 예약 및 상담" },
@@ -948,6 +975,24 @@ export default function LumenWebBuilder() {
   const updImg = (k, v) => setForm(f => ({ ...f, uploadedImages: { ...f.uploadedImages, [k]: v } }));
   const toggleArr = (key, id) => setForm(f => ({ ...f, [key]: f[key].includes(id) ? f[key].filter(x => x !== id) : [...f[key], id] }));
 
+  const isBenchmarkRelatedToIndustry = (industry, card) => {
+    if (!industry || industry === '기타') return true;
+    const keys = INDUSTRY_TEMPLATE_MATCH[industry] || [];
+    const hay = `${card.industry_vertical || ''} ${card.visual_mood || ''}`;
+    return keys.some(k => hay.includes(k));
+  };
+
+  const benchmarkMoodText = (card, idx) => {
+    const mood = MOOD_LABELS[card.visual_mood] || '균형형 비즈니스 무드';
+    const mode = card.business_mode || '자동 추천';
+    const modules = (card.key_modules || []).slice(0, 3).join(' · ');
+    return {
+      title: `레퍼런스 스타일 ${String(idx + 1).padStart(2, '0')}`,
+      subtitle: `${mood} · ${mode}`,
+      modules,
+    };
+  };
+
   // 업종 선택 시 프리셋 자동 적용
   const applyPreset = (industry) => {
     const p = INDUSTRY_PRESETS[industry];
@@ -1071,10 +1116,22 @@ export default function LumenWebBuilder() {
   const chip = on => ({ display:"inline-flex", alignItems:"center", padding:"7px 13px", borderRadius:20, fontSize:12, cursor:"pointer", margin:3, border:"1.5px solid " + (on ? "#2563EB" : "#E2E8F0"), background: on ? "#EFF6FF" : "rgba(255,255,255,0.7)", color: on ? "#2563EB" : "#64748B", transition:"all .15s" });
   const FLD  = { marginBottom:16 };
 
-  const recommendedBenchmarks = benchmarkCards
-    .filter((c) => !form.industry || (c.industry_vertical || "").includes(form.industry.split("/")[0]))
-    .filter((c) => form.businessMode === "auto" || c.business_mode === form.businessMode)
-    .slice(0, 6);
+  const industryMatchedBenchmarks = benchmarkCards
+    .filter((c) => isBenchmarkRelatedToIndustry(form.industry, c))
+    .filter((c) => form.businessMode === "auto" || c.business_mode === form.businessMode);
+
+  const recommendedBenchmarks = industryMatchedBenchmarks.length > 0
+    ? industryMatchedBenchmarks
+    : benchmarkCards.filter((c) => form.businessMode === "auto" || c.business_mode === form.businessMode);
+
+  useEffect(() => {
+    if (!form.industry || recommendedBenchmarks.length === 0) return;
+    const stillValid = recommendedBenchmarks.some((c) => c.site_url === form.benchmarkSiteUrl);
+    if (!stillValid) {
+      const first = recommendedBenchmarks[0];
+      setForm((prev) => ({ ...prev, benchmarkSiteUrl: first.site_url, benchmarkSiteName: first.site_name || '' }));
+    }
+  }, [form.industry, form.businessMode, recommendedBenchmarks.length]);
 
   const Hdr = () => (
     <div style={HDR}>
@@ -1203,13 +1260,15 @@ export default function LumenWebBuilder() {
             <div style={FLD}>
               <label style={LBL}>추천 레퍼런스 템플릿 (자동 누적 데이터 반영)</label>
               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
-                {recommendedBenchmarks.map((b) => {
+                {recommendedBenchmarks.map((b, idx) => {
                   const on = form.benchmarkSiteUrl === b.site_url;
+                  const mood = benchmarkMoodText(b, idx);
                   return (
                     <button key={b.site_url} onClick={() => setForm(f => ({ ...f, benchmarkSiteUrl: b.site_url, benchmarkSiteName: b.site_name }))}
                       style={{ textAlign:"left", padding:"10px 11px", borderRadius:10, border:"1.5px solid " + (on ? "#2563EB" : "#E2E8F0"), background:on?"#EFF6FF":"#fff", cursor:"pointer" }}>
-                      <div style={{ fontSize:12, fontWeight:600, color:on?"#2563EB":"#1E293B" }}>{b.site_name}</div>
-                      <div style={{ fontSize:10, color:"#64748B", marginTop:2 }}>{b.business_mode} · {b.industry_vertical}</div>
+                      <div style={{ fontSize:12, fontWeight:600, color:on?"#2563EB":"#1E293B" }}>{mood.title}</div>
+                      <div style={{ fontSize:10, color:"#64748B", marginTop:2 }}>{mood.subtitle}</div>
+                      {mood.modules && <div style={{ fontSize:10, color:"#94A3B8", marginTop:2 }}>구성: {mood.modules}</div>}
                     </button>
                   );
                 })}
