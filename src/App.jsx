@@ -929,28 +929,54 @@ export default function LumenWebBuilder() {
   useEffect(() => { fetchMe(authToken); }, [authToken]);
 
   async function checkEmailBeforeCode(purpose) {
-    if (!authForm.email) {
+    const normalizedEmail = String(authForm.email || '').trim().toLowerCase();
+    if (!normalizedEmail) {
       setEmailChecked(true);
       setEmailCheckOk(false);
       setEmailCheckMsg('이메일을 먼저 입력해주세요.');
       return false;
     }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(normalizedEmail)) {
+      setEmailChecked(true);
+      setEmailCheckOk(false);
+      setEmailCheckMsg('유효한 이메일 형식이 아닙니다.');
+      return false;
+    }
+
     setCheckingEmail(true);
     try {
       const checkRes = await fetch('/api/auth-check-email', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ email: authForm.email, purpose }),
+        body: JSON.stringify({ email: normalizedEmail, purpose }),
       });
       const checkRaw = await checkRes.text();
       let checkData = {};
       try { checkData = checkRaw ? JSON.parse(checkRaw) : {}; } catch { checkData = { error: checkRaw?.slice(0, 180) || '이메일 확인 실패' }; }
-      if (!checkRes.ok) throw new Error(checkData.error || '이메일 확인 실패');
+
+      if (!checkRes.ok) {
+        throw new Error(checkData.error || '이메일 확인 실패');
+      }
+
       setEmailChecked(true);
       setEmailCheckOk(true);
-      setEmailCheckMsg(purpose === 'signup' ? '가입 가능한 이메일입니다.' : '가입된 이메일이 확인되었습니다.');
+      if (checkData?.degraded) {
+        setEmailCheckMsg('서버 사전확인을 생략하고 코드발송 단계로 진행합니다.');
+      } else {
+        setEmailCheckMsg(purpose === 'signup' ? '가입 가능한 이메일입니다.' : '가입된 이메일이 확인되었습니다.');
+      }
       return true;
     } catch (e) {
+      // signup은 사전확인이 보조 단계라 일시 장애 시 코드발송 단계로 진행 허용
+      if (purpose === 'signup') {
+        setEmailChecked(true);
+        setEmailCheckOk(true);
+        setEmailCheckMsg('사전 확인이 불안정해 코드발송 단계에서 최종 확인합니다.');
+        return true;
+      }
+
       setEmailChecked(true);
       setEmailCheckOk(false);
       setEmailCheckMsg(e.message || '이메일 확인 실패');
