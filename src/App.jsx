@@ -1032,13 +1032,14 @@ export default function LumenWebBuilder() {
     });
   };
 
-  const runGenerate = async (extra) => {
+  const runGenerate = async (extra, formOverride = null) => {
+    const workingForm = formOverride || form;
     setStep("generating"); setGenLog([]); setProgress(0);
-    const { logo, hero, products } = form.uploadedImages;
+    const { logo, hero, products } = workingForm.uploadedImages;
     const LOG_MSGS = [
       "✅ 인테이크 폼 분석 중...",
       "✅ 이미지 처리 (로고:" + (logo?"✓":"✗") + " 히어로:" + (hero?"✓":"✗") + " 제품:" + products.length + "장)",
-      "✅ " + (form.selectedTheme ? form.selectedTheme.name + " 테마 + " : "") + (ILLUST_STYLES.find(s => s.id === form.illustStyle)||{}).label + " 적용 중...",
+      "✅ " + (workingForm.selectedTheme ? workingForm.selectedTheme.name + " 테마 + " : "") + (ILLUST_STYLES.find(s => s.id === workingForm.illustStyle)||{}).label + " 적용 중...",
       "✅ 로컬 템플릿 엔진으로 카드 구조 생성 중...",
       "✅ HTML · CSS 코드 생성 중...",
       "✅ CTA 삽입 및 반응형 최적화 중...",
@@ -1065,13 +1066,13 @@ export default function LumenWebBuilder() {
           }
         }, 140);
       });
-      const final = generateLocalHtml(form, { extra });
+      const final = generateLocalHtml(workingForm, { extra });
       for (let i = nextLogIdx; i < LOG_THRESHOLDS.length; i++) setGenLog(prev => [...prev, LOG_MSGS[i]]);
       setProgress(95); await new Promise(r => setTimeout(r, 300));
       setProgress(100); setGenLog(prev => [...prev, LOG_MSGS[LOG_MSGS.length - 1]]);
       await new Promise(r => setTimeout(r, 500));
       setResultHtml(final);
-      setCurImages({ logo: form.uploadedImages.logo, hero: form.uploadedImages.hero, products: [...form.uploadedImages.products] });
+      setCurImages({ logo: workingForm.uploadedImages.logo, hero: workingForm.uploadedImages.hero, products: [...workingForm.uploadedImages.products] });
       setApplied([]); setEditConfirmed(false); setEditMode(false); setStep("result");
     } catch (e) { setGenLog(prev => [...prev, "❌ 오류: " + e.message]); }
   };
@@ -1088,7 +1089,14 @@ export default function LumenWebBuilder() {
   const handleRegenerate = async () => {
     try {
       await useCredit('regenerate');
-      runGenerate('이전과 완전히 다른 레이아웃과 카드 배치로 재생성. 색감과 타이포는 동일 테마 유지.');
+      const alternates = recommendedBenchmarks.filter((b) => b.site_url !== form.benchmarkSiteUrl);
+      let nextForm = form;
+      if (alternates.length > 0) {
+        const pick = alternates[Math.floor(Math.random() * alternates.length)];
+        nextForm = { ...form, benchmarkSiteUrl: pick.site_url, benchmarkSiteName: pick.site_name || '' };
+        setForm(nextForm);
+      }
+      runGenerate('이전 결과와 확실히 다르게, 현재 선택된 레퍼런스 템플릿 분위기를 강하게 반영해 재생성. 섹션 순서/카드 스타일/히어로 구성을 다르게 구성.', nextForm);
     } catch (e) {
       alert(e.message);
     }
