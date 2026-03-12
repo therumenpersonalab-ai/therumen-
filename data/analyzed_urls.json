@@ -13,7 +13,7 @@
     "https://developers.imweb.me/",
     "https://design.imweb.me/"
   ],
-  "lastRun": "2026-03-11T15:30:06.611Z",
+  "lastRun": "2026-03-12T04:31:31.828Z",
   "logs": [
     {
       "at": "2026-03-11T15:30:06.611Z",
@@ -29,6 +29,21 @@
       "at": "2026-03-11T15:30:06.611Z",
       "processed": 6,
       "added": 4
+    },
+    {
+      "at": "2026-03-12T04:31:31.828Z",
+      "url": "https://cdn.imweb.me/",
+      "error": "https://cdn.imweb.me/ 403"
+    },
+    {
+      "at": "2026-03-12T04:31:31.828Z",
+      "url": "https://static.imweb.me/",
+      "error": "https://static.imweb.me/ 403"
+    },
+    {
+      "at": "2026-03-12T04:31:31.828Z",
+      "processed": 2,
+      "added": 0
     }
   ]
 }

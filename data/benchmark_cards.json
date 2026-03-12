@@ -11,7 +11,8 @@
       "cart",
       "login"
     ],
-    "visual_mood": "minimal-premium"
+    "visual_mood": "minimal-premium",
+    "lumen_industry": "쇼핑/이커머스"
   },
   {
     "site_name": "OUSQUE",
@@ -24,7 +25,8 @@
       "site-search",
       "language-toggle"
     ],
-    "visual_mood": "editorial"
+    "visual_mood": "editorial",
+    "lumen_industry": "IT/소프트웨어"
   },
   {
     "site_name": "프락시스룸",
@@ -37,7 +39,8 @@
       "qna",
       "notice"
     ],
-    "visual_mood": "image-immersive"
+    "visual_mood": "image-immersive",
+    "lumen_industry": "기타"
   },
   {
     "site_name": "디자인청춘",
@@ -49,7 +52,8 @@
       "case-grid",
       "inquiry-cta"
     ],
-    "visual_mood": "minimal-editorial"
+    "visual_mood": "minimal-editorial",
+    "lumen_industry": "IT/소프트웨어"
   },
   {
     "site_name": "제로투히어로",
@@ -62,7 +66,8 @@
       "promotion-badge",
       "brand-story"
     ],
-    "visual_mood": "bold-d2c"
+    "visual_mood": "bold-d2c",
+    "lumen_industry": "쇼핑/이커머스"
   },
   {
     "site_name": "ITHACA",
@@ -76,7 +81,8 @@
       "support-pack",
       "instagram-feed"
     ],
-    "visual_mood": "lifestyle-magazine"
+    "visual_mood": "lifestyle-magazine",
+    "lumen_industry": "IT/소프트웨어"
   },
   {
     "site_name": "완스파파",
@@ -90,7 +96,8 @@
       "event",
       "trust-stack"
     ],
-    "visual_mood": "friendly-trust"
+    "visual_mood": "friendly-trust",
+    "lumen_industry": "반려동물"
   },
   {
     "site_name": "Fastdesign",
@@ -102,7 +109,8 @@
       "resource-pack",
       "category-filter"
     ],
-    "visual_mood": "corporate-tooling"
+    "visual_mood": "corporate-tooling",
+    "lumen_industry": "기타"
   },
   {
     "site_name": "team",
@@ -116,7 +124,8 @@
       "contact"
     ],
     "visual_mood": "auto-derived",
-    "analyzed_at": "2026-03-11T15:30:06.611Z"
+    "analyzed_at": "2026-03-11T15:30:06.611Z",
+    "lumen_industry": "IT/소프트웨어"
   },
   {
     "site_name": "salessupport",
@@ -130,7 +139,8 @@
       "contact"
     ],
     "visual_mood": "auto-derived",
-    "analyzed_at": "2026-03-11T15:30:06.611Z"
+    "analyzed_at": "2026-03-11T15:30:06.611Z",
+    "lumen_industry": "IT/소프트웨어"
   },
   {
     "site_name": "developers",
@@ -144,7 +154,8 @@
       "contact"
     ],
     "visual_mood": "auto-derived",
-    "analyzed_at": "2026-03-11T15:30:06.611Z"
+    "analyzed_at": "2026-03-11T15:30:06.611Z",
+    "lumen_industry": "기타"
   },
   {
     "site_name": "design",
@@ -158,6 +169,7 @@
       "contact"
     ],
     "visual_mood": "auto-derived",
-    "analyzed_at": "2026-03-11T15:30:06.611Z"
+    "analyzed_at": "2026-03-11T15:30:06.611Z",
+    "lumen_industry": "IT/소프트웨어"
   }
 ]
