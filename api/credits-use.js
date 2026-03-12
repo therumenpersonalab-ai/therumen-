@@ -1,4 +1,4 @@
-import { initDb, pool } from './_lib/db.js';
+import { initDb, pool, dbMode } from './_lib/db.js';
 import { getBearerToken, verifyToken } from './_lib/auth.js';
 import { COSTS } from './_lib/credits.js';
 
@@ -13,6 +13,13 @@ export default async function handler(req, res) {
     const { action } = req.body || {};
     const cost = COSTS[action];
     if (typeof cost !== 'number') return res.status(400).json({ error: 'invalid action' });
+
+    if (dbMode() === 'memory') {
+      const credits = Number(payload.credits ?? 200);
+      if ((payload.role || 'user') === 'admin') return res.status(200).json({ ok: true, credits: 99999999, unlimited: true, mode: 'memory' });
+      if (credits < cost) return res.status(403).json({ error: '크레딧 부족', credits });
+      return res.status(200).json({ ok: true, credits: credits - cost, cost, mode: 'memory' });
+    }
 
     const q = await pool.query('SELECT id,role,credits FROM users WHERE id=$1', [payload.id]);
     if (q.rowCount === 0) return res.status(401).json({ error: 'unauthorized' });

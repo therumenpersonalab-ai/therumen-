@@ -1,4 +1,4 @@
-import { initDb, pool } from './_lib/db.js';
+import { initDb, pool, dbMode } from './_lib/db.js';
 import { getBearerToken, verifyToken } from './_lib/auth.js';
 
 export default async function handler(req, res) {
@@ -9,9 +9,22 @@ export default async function handler(req, res) {
     const payload = verifyToken(token);
     if (!payload?.id) return res.status(401).json({ error: 'unauthorized' });
 
+    if (dbMode() === 'memory') {
+      return res.status(200).json({
+        user: {
+          id: payload.id,
+          email: payload.email,
+          name: payload.name || String(payload.email || '').split('@')[0],
+          role: payload.role || 'user',
+          credits: Number(payload.credits ?? 200),
+          mode: 'memory',
+        },
+      });
+    }
+
     const q = await pool.query('SELECT id,email,name,role,credits FROM users WHERE id=$1', [payload.id]);
     if (q.rowCount === 0) return res.status(401).json({ error: 'unauthorized' });
-    return res.status(200).json({ user: q.rows[0] });
+    return res.status(200).json({ user: { ...q.rows[0], mode: 'postgres' } });
   } catch (e) {
     return res.status(500).json({ error: e.message || 'server error' });
   }

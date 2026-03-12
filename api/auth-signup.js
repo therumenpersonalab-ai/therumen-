@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import { initDb, pool } from './_lib/db.js';
+import { initDb, pool, dbMode } from './_lib/db.js';
 import { signToken } from './_lib/auth.js';
 import { DEFAULT_SIGNUP_CREDITS } from './_lib/credits.js';
 
@@ -23,8 +23,9 @@ export default async function handler(req, res) {
       [id, normalized, String(name).trim(), hash, 'user', DEFAULT_SIGNUP_CREDITS]
     );
 
-    const token = signToken({ id, email: normalized, role: 'user', exp: Date.now() + 1000 * 60 * 60 * 24 * 7 });
-    return res.status(200).json({ token, user: { id, email: normalized, name, role: 'user', credits: DEFAULT_SIGNUP_CREDITS } });
+    const mode = dbMode();
+    const token = signToken({ id, email: normalized, name: String(name).trim(), role: 'user', credits: DEFAULT_SIGNUP_CREDITS, mode, exp: Date.now() + 1000 * 60 * 60 * 24 * 7 });
+    return res.status(200).json({ token, user: { id, email: normalized, name, role: 'user', credits: DEFAULT_SIGNUP_CREDITS, mode } });
   } catch (e) {
     console.error('auth-signup error:', e);
     return res.status(500).json({ error: '회원가입 처리 중 오류가 발생했습니다.' });
