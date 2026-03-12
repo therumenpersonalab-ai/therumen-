@@ -61,6 +61,16 @@ const PURPOSE_OPTIONS = [
 
 const BUSINESS_MODES = ["auto","판매형","소개/문의형","포트폴리오형","예약형","콘텐츠형","커뮤니티형","행사/프로모션형"];
 
+const MODE_COPY_PRESETS = {
+  "판매형": { desc: "지금 가장 잘 나가는 상품을 빠르게 만나보세요", services: "베스트셀러 상품, 시즌 특가, 추천 패키지" },
+  "소개/문의형": { desc: "신뢰할 수 있는 서비스와 전문 상담을 제공합니다", services: "핵심 서비스 소개, 상담 문의, 맞춤 제안" },
+  "포트폴리오형": { desc: "완성도 높은 결과물과 실제 사례를 확인해보세요", services: "대표 작업 사례, 프로젝트 소개, 성과 리뷰" },
+  "예약형": { desc: "원하는 시간에 간편하게 예약하고 이용하세요", services: "실시간 예약, 일정 선택, 방문/상담 접수" },
+  "콘텐츠형": { desc: "유익한 정보와 노하우를 정리해 전달합니다", services: "전문 칼럼, 가이드 콘텐츠, 업데이트 소식" },
+  "커뮤니티형": { desc: "고객과 함께 소통하며 가치를 만들어갑니다", services: "후기 공유, Q&A, 커뮤니티 소식" },
+  "행사/프로모션형": { desc: "지금 진행 중인 특별 혜택과 이벤트를 확인하세요", services: "기간 한정 이벤트, 할인 프로모션, 참여 안내" },
+};
+
 const PAGE_OPTIONS = [
   { id:"about",     label:"회사 소개" },
   { id:"service",   label:"서비스/제품" },
@@ -943,11 +953,12 @@ export default function LumenWebBuilder() {
     const p = INDUSTRY_PRESETS[industry];
     if (!p) return;
     const theme = THEMES.find(t => t.id === p.themeId) || null;
+    const modeCopy = MODE_COPY_PRESETS[form.businessMode];
     setForm(f => ({
       ...f,
       industry,
-      description: p.desc || "",
-      services: p.services || "",
+      description: modeCopy ? `${industry} 고객을 위한 ${modeCopy.desc}` : (p.desc || ""),
+      services: modeCopy ? modeCopy.services : (p.services || ""),
       target: p.target || "",
       purpose: p.purpose || [],
       pages: p.pages || [],
@@ -956,6 +967,23 @@ export default function LumenWebBuilder() {
       introTone: p.tone || "professional",
       illustStyle: p.illust || "flat",
     }));
+  };
+
+  const applyBusinessMode = (mode) => {
+    setForm(prev => {
+      const p = INDUSTRY_PRESETS[prev.industry] || {};
+      const modeCopy = MODE_COPY_PRESETS[mode];
+      return {
+        ...prev,
+        businessMode: mode,
+        description: modeCopy
+          ? `${prev.industry || "우리"} 고객을 위한 ${modeCopy.desc}`
+          : (p.desc || prev.description || ""),
+        services: modeCopy
+          ? modeCopy.services
+          : (p.services || prev.services || ""),
+      };
+    });
   };
 
   const runGenerate = async (extra) => {
@@ -1166,7 +1194,7 @@ export default function LumenWebBuilder() {
               <label style={LBL}>운영 목적(템플릿 모드)</label>
               <div style={{ display:"flex", flexWrap:"wrap" }}>
                 {BUSINESS_MODES.map(m => (
-                  <span key={m} style={chip(form.businessMode === m)} onClick={() => upd("businessMode", m)}>
+                  <span key={m} style={chip(form.businessMode === m)} onClick={() => applyBusinessMode(m)}>
                     {form.businessMode === m ? "✓ " : ""}{m === "auto" ? "자동 추천" : m}
                   </span>
                 ))}
