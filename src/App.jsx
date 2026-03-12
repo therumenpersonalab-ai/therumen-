@@ -154,10 +154,10 @@ async function callClaude(messages) {
 }
 
 async function generateDalleImage(prompt, size) {
-  const res = await fetch("/api/dalle", {
+  const res = await fetch("/api/generate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt, size }),
+    body: JSON.stringify({ task: 'ai_image', prompt, size }),
   });
   const data = await res.json();
   if (data.error) throw new Error(data.error);
@@ -702,7 +702,7 @@ function AiImagePanel({ form, credit, resultHtml, setResultHtml, consumeCredit }
   return (
     <div style={{ padding:"14px 16px" }}>
       <div style={{ fontSize:12, color:"#64748B", marginBottom:12, background:"#F0F9FF", borderRadius:8, padding:"10px 12px", border:"1px solid #BAE6FD" }}>
-        🎨 <strong style={{ color:"#0369A1" }}>AI 맞춤 생성</strong> 요청은 서버로 전달되고 에이레가 처리한 결과가 자동 반영됩니다.
+        🎨 <strong style={{ color:"#0369A1" }}>AI 맞춤 생성</strong>은 서버로 전달되어 에이레 처리 경로로 자동 반영됩니다.
       </div>
       <div onClick={() => setKorean(v => !v)}
         style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"10px 12px", borderRadius:10, border:"1.5px solid " + (korean ? "#2563EB" : "#E2E8F0"), background: korean ? "#EFF6FF" : "#F8FAFC", cursor:"pointer", marginBottom:12 }}>
