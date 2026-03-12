@@ -4,7 +4,7 @@ import benchmarkCards from "../data/benchmark_cards.json";
 
 const INITIAL_CREDIT  = 200;
 const COST_GENERATE   = 80;
-const COST_REGENERATE = 10;
+const COST_REGENERATE = 30;
 const COST_AI_IMAGE   = 20;
 const COST_TEXT_EDIT   = 5;
 const COST_INLINE_EDIT = 3;
@@ -1856,6 +1856,19 @@ export default function LumenWebBuilder() {
                 ))}
               </div>
             </div>
+            <RightPanel
+              credit={credit}
+              setCredit={setCredit}
+              form={form}
+              resultHtml={resultHtml}
+              setResultHtml={setResultHtml}
+              appliedFeatures={appliedFeatures}
+              setAppliedFeatures={setApplied}
+              currentImages={curImages}
+              setCurrentImages={setCurImages}
+              apiKey={null}
+              openApiKeyModal={() => {}}
+            />
             <div style={{ background:"#fff", border:"1px solid #E2E8F0", borderRadius:12, padding:16 }}>
               <div style={{ display:'flex', gap:6, marginBottom:10 }}>
                 <button
