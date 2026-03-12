@@ -1051,7 +1051,27 @@ export default function LumenWebBuilder() {
   const Hdr = () => (
     <div style={HDR}>
       <div style={{ fontWeight:600, fontSize:17, color:"#1E293B", letterSpacing:"-0.4px" }}>루멘<span style={{ color:"#2563EB" }}> 웹 빌더</span></div>
-      <CreditBadge credit={credit} />
+      <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+        {me && (
+          <div style={{ fontSize:11, fontWeight:500, color:"#475569", background:"#F8FAFC", border:"1px solid #E2E8F0", borderRadius:16, padding:"4px 10px" }}>
+            {me.email}{me.role === "admin" ? " (관리자)" : ""}
+          </div>
+        )}
+        <CreditBadge credit={credit} />
+        {me && (
+          <button
+            onClick={() => {
+              localStorage.removeItem("lumen_token");
+              setAuthToken("");
+              setMe(null);
+              setStep("intro");
+            }}
+            style={{ padding:"7px 10px", borderRadius:8, border:"1px solid #E2E8F0", background:"#fff", color:"#475569", fontSize:11, cursor:"pointer" }}
+          >
+            로그아웃
+          </button>
+        )}
+      </div>
     </div>
   );
 

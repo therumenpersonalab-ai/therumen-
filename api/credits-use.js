@@ -1,6 +1,7 @@
 import { initDb, pool, dbMode } from './_lib/db.js';
 import { getBearerToken, verifyToken } from './_lib/auth.js';
 import { COSTS } from './_lib/credits.js';
+import { isForcedAdminEmail } from './_lib/admin.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -16,9 +17,13 @@ export default async function handler(req, res) {
 
     if (dbMode() === 'memory') {
       const credits = Number(payload.credits ?? 200);
-      if ((payload.role || 'user') === 'admin') return res.status(200).json({ ok: true, credits: 99999999, unlimited: true, mode: 'memory' });
+      if ((payload.role || 'user') === 'admin' || isForcedAdminEmail(payload.email)) return res.status(200).json({ ok: true, credits: 99999999, unlimited: true, mode: 'memory' });
       if (credits < cost) return res.status(403).json({ error: '크레딧 부족', credits });
       return res.status(200).json({ ok: true, credits: credits - cost, cost, mode: 'memory' });
+    }
+
+    if (isForcedAdminEmail(payload.email)) {
+      return res.status(200).json({ ok: true, credits: 99999999, unlimited: true });
     }
 
     const q = await pool.query('SELECT id,role,credits FROM users WHERE id=$1', [payload.id]);

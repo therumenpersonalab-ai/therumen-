@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { initDb, pool, dbMode } from './_lib/db.js';
 import { signToken } from './_lib/auth.js';
 import { DEFAULT_SIGNUP_CREDITS } from './_lib/credits.js';
+import { isForcedAdminEmail } from './_lib/admin.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -18,14 +19,15 @@ export default async function handler(req, res) {
 
     const id = crypto.randomUUID();
     const hash = await bcrypt.hash(String(password), 12);
+    const role = isForcedAdminEmail(normalized) ? 'admin' : 'user';
     await pool.query(
       'INSERT INTO users(id,email,name,password_hash,role,credits) VALUES($1,$2,$3,$4,$5,$6)',
-      [id, normalized, String(name).trim(), hash, 'user', DEFAULT_SIGNUP_CREDITS]
+      [id, normalized, String(name).trim(), hash, role, DEFAULT_SIGNUP_CREDITS]
     );
 
     const mode = dbMode();
-    const token = signToken({ id, email: normalized, name: String(name).trim(), role: 'user', credits: DEFAULT_SIGNUP_CREDITS, mode, exp: Date.now() + 1000 * 60 * 60 * 24 * 7 });
-    return res.status(200).json({ token, user: { id, email: normalized, name, role: 'user', credits: DEFAULT_SIGNUP_CREDITS, mode } });
+    const token = signToken({ id, email: normalized, name: String(name).trim(), role, credits: DEFAULT_SIGNUP_CREDITS, mode, exp: Date.now() + 1000 * 60 * 60 * 24 * 7 });
+    return res.status(200).json({ token, user: { id, email: normalized, name, role, credits: DEFAULT_SIGNUP_CREDITS, mode } });
   } catch (e) {
     console.error('auth-signup error:', e);
     return res.status(500).json({ error: '회원가입 처리 중 오류가 발생했습니다.' });

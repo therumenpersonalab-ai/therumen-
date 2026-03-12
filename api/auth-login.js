@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { initDb, pool, dbMode } from './_lib/db.js';
 import { signToken } from './_lib/auth.js';
+import { isForcedAdminEmail } from './_lib/admin.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -14,8 +15,9 @@ export default async function handler(req, res) {
     if (dbMode() === 'memory') {
       if (String(password).length < 8) return res.status(401).json({ error: '로그인 실패' });
       const id = `mem_${normalized}`;
-      const token = signToken({ id, email: normalized, name: normalized.split('@')[0], role: 'user', credits: 200, mode: 'memory', exp: Date.now() + 1000 * 60 * 60 * 24 * 7 });
-      return res.status(200).json({ token, user: { id, email: normalized, name: normalized.split('@')[0], role: 'user', credits: 200, mode: 'memory' } });
+      const role = isForcedAdminEmail(normalized) ? 'admin' : 'user';
+      const token = signToken({ id, email: normalized, name: normalized.split('@')[0], role, credits: 200, mode: 'memory', exp: Date.now() + 1000 * 60 * 60 * 24 * 7 });
+      return res.status(200).json({ token, user: { id, email: normalized, name: normalized.split('@')[0], role, credits: 200, mode: 'memory' } });
     }
 
     const q = await pool.query('SELECT id,email,name,password_hash,role,credits FROM users WHERE email=$1', [normalized]);
@@ -25,8 +27,14 @@ export default async function handler(req, res) {
     const ok = await bcrypt.compare(String(password), u.password_hash);
     if (!ok) return res.status(401).json({ error: '로그인 실패' });
 
-    const token = signToken({ id: u.id, email: u.email, name: u.name, role: u.role, credits: u.credits, mode: 'postgres', exp: Date.now() + 1000 * 60 * 60 * 24 * 7 });
-    return res.status(200).json({ token, user: { id: u.id, email: u.email, name: u.name, role: u.role, credits: u.credits, mode: 'postgres' } });
+    let role = u.role;
+    if (isForcedAdminEmail(u.email) && u.role !== 'admin') {
+      await pool.query('UPDATE users SET role=$1 WHERE id=$2', ['admin', u.id]);
+      role = 'admin';
+    }
+
+    const token = signToken({ id: u.id, email: u.email, name: u.name, role, credits: u.credits, mode: 'postgres', exp: Date.now() + 1000 * 60 * 60 * 24 * 7 });
+    return res.status(200).json({ token, user: { id: u.id, email: u.email, name: u.name, role, credits: u.credits, mode: 'postgres' } });
   } catch (e) {
     console.error('auth-login error:', e);
     return res.status(500).json({ error: '로그인 처리 중 오류가 발생했습니다.' });
