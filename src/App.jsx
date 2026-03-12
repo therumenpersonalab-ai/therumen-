@@ -8,6 +8,7 @@ const COST_REGENERATE = 30;
 const COST_AI_IMAGE   = 20;
 const COST_TEXT_EDIT   = 5;
 const COST_INLINE_EDIT = 3;
+const COST_INLINE_AI_HELP = 1;
 
 // ── 업종별 자동 프리셋 (아임웹 시각 클러스터 반영) ──────────
 const INDUSTRY_PRESETS = {
@@ -111,24 +112,22 @@ const PAGE_OPTIONS = [
 const FEATURES = [
   { id:"map",       label:"📍 구글 지도 삽입",   cost:10, prompt:"오시는 길 섹션에 구글 지도 임베드 placeholder를 추가하세요." },
   { id:"kakao",     label:"💬 카카오채널 버튼",  cost:15, prompt:"우측 하단 고정 카카오채널 상담 버튼을 추가하세요." },
-  { id:"color",     label:"🎨 컬러 테마 변경",   cost:15, prompt:"전체 색상 팔레트를 세련된 다른 컬러로 리디자인하세요." },
   { id:"popup",     label:"📢 팝업 배너",         cost:20, prompt:"페이지 진입 시 이벤트/공지 팝업을 추가하세요." },
   { id:"sns",       label:"📷 SNS 피드 연동",     cost:25, prompt:"인스타그램 피드 스타일의 갤러리 섹션을 추가하세요." },
   { id:"form",      label:"📅 예약/문의 폼",      cost:40, prompt:"이메일 연동 예약 및 문의 폼 섹션을 추가하세요." },
-  { id:"ai_text",   label:"✍️ 소개글 AI 재작성", cost:20, prompt:"업종과 브랜드에 맞는 감성적인 소개글로 전면 교체하세요." },
   { id:"animation", label:"✨ 애니메이션 효과",   cost:25, prompt:"스크롤 시 섹션들이 부드럽게 등장하는 CSS 애니메이션을 추가하세요." },
 ];
 
 const AI_IMAGE_SLOTS = [
-  { id:"hero",   label:"히어로 이미지", size:"1792x1024",
+  { id:"hero",   label:"히어로 이미지", location:'히어로 상단 메인 배너', size:"1792x1024",
     buildPrompt:(f,kr) => "A stunning professional hero banner for a " + f.industry + " business called " + f.company + ". High-end commercial photography, cinematic lighting." + (kr ? " Korean people if applicable." : "") + " Absolutely no text anywhere." },
-  { id:"svc1",   label:"서비스 이미지 1", size:"1024x1024",
+  { id:"svc1",   label:"서비스 이미지 1", location:'서비스 카드 1', size:"1024x1024",
     buildPrompt:(f,kr) => "Professional service photo for " + f.company + " " + f.industry + "." + (kr ? " Korean people." : "") + " No text anywhere." },
-  { id:"svc2",   label:"서비스 이미지 2", size:"1024x1024",
+  { id:"svc2",   label:"서비스 이미지 2", location:'서비스 카드 2', size:"1024x1024",
     buildPrompt:(f,kr) => "Lifestyle scene for " + f.company + " " + f.industry + "." + (kr ? " Korean people." : "") + " No text anywhere." },
-  { id:"svc3",   label:"서비스 이미지 3", size:"1024x1024",
+  { id:"svc3",   label:"서비스 이미지 3", location:'서비스 카드 3', size:"1024x1024",
     buildPrompt:(f,kr) => "Detail close-up for " + f.company + " " + f.industry + " quality." + (kr ? " Korean people." : "") + " No text anywhere." },
-  { id:"bg",     label:"배경 이미지", size:"1792x1024",
+  { id:"bg",     label:"배경 이미지", location:'섹션 배경(강조 영역)', size:"1792x1024",
     buildPrompt:(f,_)  => "Abstract background texture for " + f.industry + " website. Subtle elegant. No text anywhere." },
 ];
 
@@ -724,7 +723,7 @@ function AiImagePanel({ form, credit, resultHtml, setResultHtml, consumeCredit }
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom: img ? 8 : 0 }}>
               <div>
                 <div style={{ fontSize:12, fontWeight:500, color:"#1E293B" }}>{slot.label}</div>
-                <div style={{ fontSize:10, color:"#94A3B8" }}>{slot.size} · {COST_AI_IMAGE}C</div>
+                <div style={{ fontSize:10, color:"#94A3B8" }}>{slot.location} · {slot.size} · {COST_AI_IMAGE}C</div>
               </div>
               <button onClick={() => handle(slot)} disabled={isGen || !ok}
                 style={{ padding:"5px 11px", borderRadius:7, fontSize:11, fontWeight:500, border:"none", cursor:(isGen || !ok) ? "not-allowed" : "pointer", background: isGen ? "#E2E8F0" : img ? "#D1FAE5" : ok ? "#EFF6FF" : "#F1F5F9", color: isGen ? "#64748B" : img ? "#065F46" : ok ? "#2563EB" : "#94A3B8" }}>
@@ -752,19 +751,42 @@ function RightPanel({ credit, form, resultHtml, setResultHtml, appliedFeatures, 
   const [editInput, setEditInput]     = useState("");
   const [editLoading, setEditLoading] = useState(false);
   const [editHistory, setEditHistory] = useState([]);
+  const [featureSnapshots, setFeatureSnapshots] = useState({});
+  const [popupText, setPopupText] = useState('지금 신청하면 특별 혜택을 드립니다.');
 
   const handleFeature = async (f) => {
     if (credit < f.cost || appliedFeatures.includes(f.id)) return;
     setLoading(f.id);
     try {
       await consumeCredit('feature', f.cost, { cost: f.cost });
-      const html = await callClaude([{ role:"user", content:"다음 HTML에 기능 추가:\n" + f.prompt + "\n\n기존 HTML:\n" + resultHtml + "\n\nHTML만 출력." }]);
+      const prompt = f.id === 'popup'
+        ? `${f.prompt}\n팝업 문구는 반드시 다음 텍스트를 사용: ${popupText || '지금 신청하면 특별 혜택을 드립니다.'}`
+        : f.prompt;
+      const html = await callClaude([{ role:"user", content:"다음 HTML에 기능 추가:\n" + prompt + "\n\n기존 HTML:\n" + resultHtml + "\n\nHTML만 출력." }]);
+      setFeatureSnapshots(prev => ({ ...prev, [f.id]: resultHtml }));
       setResultHtml(html);
       setAppliedFeatures(prev => [...prev, f.id]);
     } catch (e) {
       alert(e?.message || '기능 추가 실패');
     }
     setLoading(null);
+  };
+
+  const handleFeatureCancel = async (f) => {
+    if (!appliedFeatures.includes(f.id)) return;
+    try {
+      await consumeCredit('refund_feature', 0, { cost: f.cost });
+      const snap = featureSnapshots[f.id];
+      if (snap) setResultHtml(snap);
+      setAppliedFeatures(prev => prev.filter((id) => id !== f.id));
+      setFeatureSnapshots(prev => {
+        const n = { ...prev };
+        delete n[f.id];
+        return n;
+      });
+    } catch (e) {
+      alert(e?.message || '기능 취소 실패');
+    }
   };
 
   const handleImgReplace = async (type, newVal) => {
@@ -868,21 +890,39 @@ function RightPanel({ credit, form, resultHtml, setResultHtml, appliedFeatures, 
 
         {/* 기능 추가 탭 */}
         {tab === "feature" && (
-          <div style={{ maxHeight:400, overflowY:"auto" }}>
+          <div style={{ maxHeight:460, overflowY:"auto" }}>
+            <div style={{ padding:"10px 14px", borderBottom:"1px solid #F1F5F9", background:'#F8FAFC' }}>
+              <div style={{ fontSize:11, color:'#475569', marginBottom:6 }}>기능 추가 후 <strong>취소</strong>를 누르면 해당 기능이 원복되고 크레딧이 반환됩니다.</div>
+              <div style={{ fontSize:11, color:'#475569' }}>애니메이션 효과는 섹션/카드에 페이드업 등장(@keyframes fadeUp)으로 적용됩니다.</div>
+            </div>
             {FEATURES.map(f => {
               const applied = appliedFeatures.includes(f.id);
               const isLoading = loadingFeature === f.id;
               const ok = credit >= f.cost;
               return (
-                <div key={f.id} style={{ padding:"10px 14px", borderBottom:"1px solid #F8FAFC", display:"flex", alignItems:"center", justifyContent:"space-between", opacity: applied ? 0.5 : 1 }}>
+                <div key={f.id} style={{ padding:"10px 14px", borderBottom:"1px solid #F8FAFC", display:"flex", alignItems:"center", justifyContent:"space-between", opacity: isLoading ? 0.6 : 1 }}>
                   <div style={{ flex:1 }}>
                     <div style={{ fontSize:13, fontWeight:500, color:"#1E293B" }}>{f.label}</div>
                     <div style={{ fontSize:10, color: applied ? "#16A34A" : "#94A3B8" }}>{applied ? "✅ 적용됨" : f.cost + "C"}</div>
+                    {f.id === 'popup' && (
+                      <input
+                        value={popupText}
+                        onChange={(e) => setPopupText(e.target.value)}
+                        placeholder="팝업 문구를 입력하세요"
+                        style={{ marginTop:6, width:'100%', padding:'7px 8px', border:'1px solid #E2E8F0', borderRadius:8, fontSize:11 }}
+                      />
+                    )}
                   </div>
-                  <button onClick={() => handleFeature(f)} disabled={applied || isLoading || !ok}
-                    style={{ padding:"6px 14px", borderRadius:8, fontSize:11, fontWeight:600, border: applied ? "none" : ok ? "1.5px solid #2563EB" : "1.5px solid #E2E8F0", cursor:(applied||!ok)?"not-allowed":"pointer", background: applied?"#D1FAE5":ok?"#EFF6FF":"#F8FAFC", color: applied?"#065F46":ok?"#2563EB":"#CBD5E1", minWidth:56 }}>
-                    {isLoading ? "⏳" : applied ? "✓" : "+" + f.cost + "C"}
-                  </button>
+                  <div style={{ display:'flex', gap:6, marginLeft:8 }}>
+                    <button onClick={() => handleFeature(f)} disabled={applied || isLoading || !ok}
+                      style={{ padding:"6px 10px", borderRadius:8, fontSize:11, fontWeight:600, border: applied ? "1.5px solid #E2E8F0" : ok ? "1.5px solid #2563EB" : "1.5px solid #E2E8F0", cursor:(applied||!ok)?"not-allowed":"pointer", background: applied?"#F8FAFC":ok?"#EFF6FF":"#F8FAFC", color: applied?"#94A3B8":ok?"#2563EB":"#CBD5E1", minWidth:56 }}>
+                      {isLoading ? "⏳" : "+" + f.cost + "C"}
+                    </button>
+                    <button onClick={() => handleFeatureCancel(f)} disabled={!applied || isLoading}
+                      style={{ padding:"6px 10px", borderRadius:8, fontSize:11, fontWeight:600, border:'1.5px solid #FECACA', background: applied ? '#FEF2F2' : '#F8FAFC', color: applied ? '#DC2626' : '#CBD5E1', cursor: applied ? 'pointer' : 'not-allowed', minWidth:56 }}>
+                      취소
+                    </button>
+                  </div>
                 </div>
               );
             })}
@@ -943,6 +983,8 @@ export default function LumenWebBuilder() {
   const [viewport, setViewport]       = useState("desktop");
   const [editMode, setEditMode]       = useState(false);
   const [editConfirmed, setEditConfirmed] = useState(false);
+  const [inlineAiPrompt, setInlineAiPrompt] = useState('문구를 더 자연스럽고 설득력 있게 개선');
+  const [inlineAiLoading, setInlineAiLoading] = useState(false);
   const pendingHtml = useRef("");
 
   // postMessage로 iframe에서 편집된 HTML 수신
@@ -988,6 +1030,27 @@ export default function LumenWebBuilder() {
   const cancelEdit = () => {
     setEditMode(false);
     pendingHtml.current = "";
+  };
+
+  const handleInlineAiHelp = async () => {
+    if (!editMode || inlineAiLoading) return;
+    if (credit < COST_INLINE_AI_HELP) { alert(`크레딧이 부족합니다 (${COST_INLINE_AI_HELP}C 필요)`); return; }
+    setInlineAiLoading(true);
+    try {
+      await consumeCredit('inline_ai_help', COST_INLINE_AI_HELP);
+      const baseHtml = pendingHtml.current || resultHtml;
+      const html = await callClaude([{ role:'user', content:
+        "다음 HTML에서 사용자가 요청한 문구 수정만 정확히 반영하세요.\n" +
+        "디자인/레이아웃은 유지하고 텍스트만 개선하세요.\n\n" +
+        "=== 수정 요청 ===\n" + (inlineAiPrompt || '문구를 더 자연스럽고 설득력 있게 개선') + "\n\n" +
+        "=== 현재 HTML ===\n" + baseHtml
+      }]);
+      pendingHtml.current = html;
+      setResultHtml(html);
+    } catch (e) {
+      alert(e?.message || 'AI 도움 적용 실패');
+    }
+    setInlineAiLoading(false);
   };
 
   const previewSrc = editMode ? makeEditableHtml(resultHtml) : resultHtml;
@@ -1803,11 +1866,22 @@ export default function LumenWebBuilder() {
                   </>
                 ) : (
                   <>
-                    <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:6, flex:1, minWidth:0 }}>
                       <div style={{ width:8, height:8, borderRadius:"50%", background:"#2563EB", animation:"blink 1.2s infinite" }} />
                       <span style={{ fontSize:12, fontWeight:600, color:"#2563EB" }}>편집 중 — 미리보기에서 텍스트를 클릭하세요</span>
                     </div>
-                    <div style={{ display:"flex", gap:6 }}>
+                    <div style={{ display:"flex", gap:6, alignItems:'center' }}>
+                      <input
+                        value={inlineAiPrompt}
+                        onChange={(e) => setInlineAiPrompt(e.target.value)}
+                        placeholder="AI 도움 수정 요청"
+                        style={{ width:170, padding:'6px 8px', border:'1px solid #E2E8F0', borderRadius:8, fontSize:11 }}
+                      />
+                      <button onClick={handleInlineAiHelp}
+                        disabled={inlineAiLoading || credit < COST_INLINE_AI_HELP}
+                        style={{ padding:"6px 10px", borderRadius:8, border:"1px solid #BFDBFE", background: (inlineAiLoading || credit < COST_INLINE_AI_HELP) ? '#F8FAFC' : '#EFF6FF', color:(inlineAiLoading || credit < COST_INLINE_AI_HELP) ? '#94A3B8' : '#1D4ED8', fontSize:11, fontWeight:600, cursor:(inlineAiLoading || credit < COST_INLINE_AI_HELP) ? 'not-allowed' : 'pointer' }}>
+                        {inlineAiLoading ? 'AI 처리중...' : `AI 도움 (${COST_INLINE_AI_HELP}C)`}
+                      </button>
                       <button onClick={cancelEdit}
                         style={{ padding:"6px 14px", borderRadius:8, border:"1px solid #E2E8F0", background:"#fff", color:"#64748B", fontSize:11, fontWeight:500, cursor:"pointer" }}>취소</button>
                       <button onClick={confirmEdit}

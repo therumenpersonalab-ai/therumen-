@@ -69,14 +69,14 @@ function applyLocalTransform(rawText, htmlInput) {
   }
 
   // 기능 추가 패턴들
-  if (t.includes('faq')) {
+  if (t.includes('faq') && !/id=["']faq["']|자주 묻는 질문/i.test(html)) {
     html = injectBeforeBodyEnd(
       html,
       `<section id="faq" style="padding:48px 20px;background:#f8fafc"><div style="max-width:980px;margin:0 auto"><h2>자주 묻는 질문</h2><details><summary>예약은 어떻게 하나요?</summary><p>문의 버튼 또는 연락처로 가능합니다.</p></details><details><summary>운영 시간은?</summary><p>페이지 하단 운영정보에서 확인할 수 있습니다.</p></details></div></section>`
     );
   }
 
-  if (t.includes('카카오')) {
+  if (t.includes('카카오') && !/pf\.kakao\.com|카카오 상담/i.test(html)) {
     html = injectBeforeBodyEnd(
       html,
       `<a href="https://pf.kakao.com" style="position:fixed;right:24px;bottom:24px;background:#FEE500;color:#3A1D1D;padding:12px 16px;border-radius:999px;text-decoration:none;font-weight:700;z-index:9999">카카오 상담</a>`
@@ -84,6 +84,10 @@ function applyLocalTransform(rawText, htmlInput) {
   }
 
   if (t.includes('구글 지도') || t.includes('오시는 길')) {
+    // 기존 지도 섹션/iframe 제거 후 1개만 재삽입
+    html = html
+      .replace(/<section[^>]*id=["']map["'][\s\S]*?<\/section>/gi, '')
+      .replace(/<iframe[^>]*maps\.google\.com[\s\S]*?<\/iframe>/gi, '');
     html = injectBeforeBodyEnd(
       html,
       `<section id="map" style="padding:48px 20px"><div style="max-width:980px;margin:0 auto"><h2>오시는 길</h2><div style="height:280px;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden"><iframe title="map" src="https://maps.google.com/maps?q=seoul&z=13&output=embed" width="100%" height="100%" style="border:0"></iframe></div></div></section>`
@@ -91,20 +95,24 @@ function applyLocalTransform(rawText, htmlInput) {
   }
 
   if (t.includes('팝업')) {
+    const textMatch = rawText.match(/팝업\s*문구[^:\n]*[:：]\s*(.+)/i);
+    const popupLine = (textMatch?.[1] || '지금 신청하면 특별 혜택을 드립니다.').trim();
+    // 기존 팝업 제거 후 1개만 재삽입(문구 업데이트 포함)
+    html = html.replace(/<div[^>]*id=["']lumen-popup["'][\s\S]*?<\/div>\s*<\/div>/gi, '');
     html = injectBeforeBodyEnd(
       html,
-      `<div id="lumen-popup" style="position:fixed;inset:0;background:rgba(2,6,23,.55);display:flex;align-items:center;justify-content:center;z-index:10000"><div style="background:#fff;border-radius:14px;padding:20px;max-width:360px;width:92%"><h3 style="margin:0 0 8px">이벤트 안내</h3><p style="margin:0 0 12px">지금 신청하면 특별 혜택을 드립니다.</p><button onclick="document.getElementById('lumen-popup').remove()" style="padding:8px 12px;border:none;border-radius:8px;background:#2563eb;color:#fff;cursor:pointer">닫기</button></div></div>`
+      `<div id="lumen-popup" style="position:fixed;inset:0;background:rgba(2,6,23,.6);display:flex;align-items:center;justify-content:center;z-index:10000;backdrop-filter:blur(6px)"><div style="position:relative;background:linear-gradient(160deg,#0f172a,#1e293b);color:#fff;border-radius:18px;padding:24px 22px;max-width:420px;width:92%;box-shadow:0 24px 60px rgba(2,6,23,.45);border:1px solid rgba(255,255,255,.12)"><div style="position:absolute;top:10px;right:10px"><button onclick="document.getElementById('lumen-popup').remove()" style="width:28px;height:28px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:transparent;color:#fff;cursor:pointer">×</button></div><div style="font-size:12px;opacity:.85;margin-bottom:8">EVENT</div><h3 style="margin:0 0 10px;font-size:22px;line-height:1.3">특별 안내</h3><p style="margin:0 0 16px;line-height:1.7;color:#e2e8f0">${popupLine}</p><div style="display:flex;gap:8"><button onclick="document.getElementById('lumen-popup').remove()" style="padding:9px 12px;border:none;border-radius:10px;background:#2563eb;color:#fff;cursor:pointer;font-weight:600">확인</button><button onclick="document.getElementById('lumen-popup').remove()" style="padding:9px 12px;border:1px solid rgba(255,255,255,.3);border-radius:10px;background:transparent;color:#fff;cursor:pointer">닫기</button></div></div></div>`
     );
   }
 
-  if (t.includes('sns') || t.includes('인스타')) {
+  if ((t.includes('sns') || t.includes('인스타')) && !/SNS 피드/i.test(html)) {
     html = injectBeforeBodyEnd(
       html,
       `<section style="padding:48px 20px;background:#f8fafc"><div style="max-width:980px;margin:0 auto"><h2>SNS 피드</h2><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px"><div style="aspect-ratio:1/1;background:#e2e8f0;border-radius:10px"></div><div style="aspect-ratio:1/1;background:#e2e8f0;border-radius:10px"></div><div style="aspect-ratio:1/1;background:#e2e8f0;border-radius:10px"></div></div></div></section>`
     );
   }
 
-  if (t.includes('예약/문의 폼') || t.includes('문의 폼') || t.includes('예약 폼')) {
+  if ((t.includes('예약/문의 폼') || t.includes('문의 폼') || t.includes('예약 폼')) && !/<form[\s\S]*문의 보내기/i.test(html)) {
     html = injectBeforeBodyEnd(
       html,
       `<section id="contact" style="padding:48px 20px"><div style="max-width:980px;margin:0 auto"><h2>예약/문의</h2><form style="display:grid;gap:10px;max-width:560px"><input placeholder="이름" style="padding:10px;border:1px solid #cbd5e1;border-radius:8px"/><input placeholder="연락처" style="padding:10px;border:1px solid #cbd5e1;border-radius:8px"/><textarea placeholder="문의 내용" style="padding:10px;border:1px solid #cbd5e1;border-radius:8px;min-height:120px"></textarea><button type="button" style="padding:10px;border:none;border-radius:8px;background:#2563eb;color:#fff">문의 보내기</button></form></div></section>`

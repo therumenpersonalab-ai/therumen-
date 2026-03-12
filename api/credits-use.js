@@ -12,8 +12,9 @@ export default async function handler(req, res) {
     if (!payload?.id) return res.status(401).json({ error: 'unauthorized' });
 
     const { action } = req.body || {};
+    const isRefund = action === 'refund_feature';
     let cost = COSTS[action];
-    if (typeof cost !== 'number' && action === 'feature') {
+    if ((typeof cost !== 'number' && action === 'feature') || isRefund) {
       const custom = Number(req.body?.cost);
       if (Number.isFinite(custom) && custom > 0 && custom <= 50) cost = Math.round(custom);
     }
@@ -22,8 +23,8 @@ export default async function handler(req, res) {
     if (dbMode() === 'memory') {
       const credits = Number(payload.credits ?? 200);
       if ((payload.role || 'user') === 'admin' || isForcedAdminEmail(payload.email)) return res.status(200).json({ ok: true, credits: 99999999, unlimited: true, mode: 'memory' });
-      if (credits < cost) return res.status(403).json({ error: '크레딧 부족', credits });
-      return res.status(200).json({ ok: true, credits: credits - cost, cost, mode: 'memory' });
+      if (!isRefund && credits < cost) return res.status(403).json({ error: '크레딧 부족', credits });
+      return res.status(200).json({ ok: true, credits: isRefund ? (credits + cost) : (credits - cost), cost, mode: 'memory', refund: isRefund });
     }
 
     if (isForcedAdminEmail(payload.email)) {
@@ -36,10 +37,13 @@ export default async function handler(req, res) {
 
     if (u.role === 'admin') return res.status(200).json({ ok: true, credits: 99999999, unlimited: true });
 
-    if (u.credits < cost) return res.status(403).json({ error: '크레딧 부족', credits: u.credits });
+    if (!isRefund && u.credits < cost) return res.status(403).json({ error: '크레딧 부족', credits: u.credits });
 
-    const updated = await pool.query('UPDATE users SET credits = credits - $1 WHERE id=$2 RETURNING credits', [cost, u.id]);
-    return res.status(200).json({ ok: true, credits: updated.rows[0].credits, cost });
+    const updated = await pool.query(
+      `UPDATE users SET credits = credits ${isRefund ? '+' : '-'} $1 WHERE id=$2 RETURNING credits`,
+      [cost, u.id]
+    );
+    return res.status(200).json({ ok: true, credits: updated.rows[0].credits, cost, refund: isRefund });
   } catch (e) {
     return res.status(500).json({ error: e.message || 'server error' });
   }
