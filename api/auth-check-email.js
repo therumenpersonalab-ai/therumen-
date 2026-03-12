@@ -1,4 +1,4 @@
-import { initDb, pool } from '../lib/db.js';
+import { initDb, pool, dbMode } from '../lib/db.js';
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim());
@@ -19,6 +19,9 @@ export default async function handler(req, res) {
 
   try {
     await initDb();
+    if (dbMode() !== 'postgres') {
+      return res.status(503).json({ error: '인증 서버 설정이 완료되지 않았습니다. 잠시 후 다시 시도해주세요.' });
+    }
     const q = await pool.query('SELECT id FROM users WHERE email=$1', [normalized]);
     const exists = q.rowCount > 0;
 

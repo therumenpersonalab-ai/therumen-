@@ -1,4 +1,4 @@
-import { initDb, pool } from '../lib/db.js';
+import { initDb, pool, dbMode } from '../lib/db.js';
 import { makeCode, saveCode, createCodeToken } from '../lib/verification.js';
 import { getMailDiagnostics, sendVerificationCodeEmail } from '../lib/email.js';
 
@@ -11,6 +11,9 @@ export default async function handler(req, res) {
 
   try {
     await initDb();
+    if (dbMode() !== 'postgres') {
+      return res.status(503).json({ error: '인증 서버 설정이 완료되지 않았습니다. 잠시 후 다시 시도해주세요.' });
+    }
     const { email, purpose } = req.body || {};
     const normalized = String(email || '').toLowerCase().trim();
 

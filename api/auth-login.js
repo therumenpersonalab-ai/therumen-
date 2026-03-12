@@ -8,6 +8,9 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   try {
     await initDb();
+    if (dbMode() !== 'postgres') {
+      return res.status(503).json({ error: '인증 서버 설정이 완료되지 않았습니다. 잠시 후 다시 시도해주세요.' });
+    }
     const { email, password } = req.body || {};
     if (!email || !password) return res.status(400).json({ error: '필수값 누락' });
 

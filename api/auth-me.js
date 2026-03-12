@@ -6,6 +6,7 @@ export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
   try {
     await initDb();
+    if (dbMode() !== 'postgres') return res.status(503).json({ error: '인증 서버 설정이 완료되지 않았습니다.' });
     const token = getBearerToken(req);
     const payload = verifyToken(token);
     if (!payload?.id) return res.status(401).json({ error: 'unauthorized' });

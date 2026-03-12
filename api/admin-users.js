@@ -1,4 +1,4 @@
-import { initDb, pool } from '../lib/db.js';
+import { initDb, pool, dbMode } from '../lib/db.js';
 import { getBearerToken, verifyToken } from '../lib/auth.js';
 import { isForcedAdminEmail } from '../lib/admin.js';
 
@@ -7,6 +7,7 @@ export default async function handler(req, res) {
 
   try {
     await initDb();
+    if (dbMode() !== 'postgres') return res.status(503).json({ error: '인증 서버 설정이 완료되지 않았습니다.' });
 
     const token = getBearerToken(req);
     const payload = verifyToken(token);
