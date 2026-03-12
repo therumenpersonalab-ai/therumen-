@@ -1313,6 +1313,11 @@ export default function LumenWebBuilder() {
     }
   }, [form.industry, form.businessMode, recommendedBenchmarks.length]);
 
+  const openAdminMode = () => {
+    setAccountTab('admin');
+    setStep('result');
+  };
+
   const Hdr = () => (
     <div style={HDR}>
       <div style={{ fontWeight:600, fontSize:17, color:"#1E293B", letterSpacing:"-0.4px" }}>루멘<span style={{ color:"#2563EB" }}> 웹 빌더</span></div>
@@ -1321,6 +1326,14 @@ export default function LumenWebBuilder() {
           <div style={{ fontSize:11, fontWeight:500, color:"#475569", background:"#F8FAFC", border:"1px solid #E2E8F0", borderRadius:16, padding:"4px 10px" }}>
             {me.email}{me.role === "admin" ? " (관리자)" : ""}
           </div>
+        )}
+        {me?.role === 'admin' && (
+          <button
+            onClick={openAdminMode}
+            style={{ padding:"7px 10px", borderRadius:8, border:"1px solid #DBEAFE", background:"#EFF6FF", color:"#1D4ED8", fontSize:11, cursor:"pointer", fontWeight:600 }}
+          >
+            관리자모드 보기
+          </button>
         )}
         <CreditBadge credit={credit} />
         {me && (
@@ -1420,7 +1433,12 @@ export default function LumenWebBuilder() {
             </div>
           ) : (
             <>
-              <button style={BTNP} onClick={() => setStep('form')}>웹사이트 만들기 시작</button>
+              <div style={{ display:'grid', gridTemplateColumns: me?.role === 'admin' ? '1fr 1fr' : '1fr', gap:8 }}>
+                <button style={BTNP} onClick={() => { setAccountTab('account'); setStep('form'); }}>웹사이트 만들기 시작</button>
+                {me?.role === 'admin' && (
+                  <button style={{ ...BTNP, background:'#0F766E' }} onClick={openAdminMode}>관리자모드 보기</button>
+                )}
+              </div>
               <div style={{ fontSize:11, color:'#0f766e', marginTop:9 }}>로그인됨: {me.email} {me.role === 'admin' ? '(관리자 · 무제한)' : `(크레딧 ${credit}C)`}</div>
             </>
           )}
