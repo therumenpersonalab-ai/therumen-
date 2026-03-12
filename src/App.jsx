@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { generateLocalHtml } from "./api/localGenerator";
 import benchmarkCards from "../data/benchmark_cards.json";
 
@@ -1076,12 +1076,13 @@ export default function LumenWebBuilder() {
   async function sendAuthCode(purpose) {
     const okCheck = await checkEmailBeforeCode(purpose);
     if (!okCheck) return;
+    const normalizedEmail = String(authForm.email || '').trim().toLowerCase();
     setCodeSending(true);
     try {
       const r = await fetch('/api/auth-send-code', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ email: authForm.email, purpose }),
+        body: JSON.stringify({ email: normalizedEmail, purpose }),
       });
       const raw = await r.text();
       let d = {};
@@ -1114,12 +1115,13 @@ export default function LumenWebBuilder() {
   async function submitAuth() {
     setAuthLoading(true);
     try {
+      const normalizedEmail = String(authForm.email || '').trim().toLowerCase();
       if (authMode === 'forgot') {
         if (!emailCheckOk) throw new Error('이메일 확인을 먼저 진행해주세요.');
         const r = await fetch('/api/auth-reset-password', {
           method:'POST',
           headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ email: authForm.email, code: authForm.code, newPassword: authForm.newPassword, codeToken: authForm.resetCodeToken }),
+          body: JSON.stringify({ email: normalizedEmail, code: authForm.code, newPassword: authForm.newPassword, codeToken: authForm.resetCodeToken }),
         });
         const d = await r.json();
         if (!r.ok) throw new Error(d.error || '비밀번호 변경 실패');
@@ -1132,8 +1134,8 @@ export default function LumenWebBuilder() {
       const endpoint = authMode === 'signup' ? '/api/auth-signup' : '/api/auth-login';
       if (authMode === 'signup' && !emailCheckOk) throw new Error('이메일 확인을 먼저 진행해주세요.');
       const payload = authMode === 'signup'
-        ? { email: authForm.email, password: authForm.password, name: authForm.name, code: authForm.code, codeToken: authForm.signupCodeToken }
-        : { email: authForm.email, password: authForm.password };
+        ? { email: normalizedEmail, password: authForm.password, name: authForm.name, code: authForm.code, codeToken: authForm.signupCodeToken }
+        : { email: normalizedEmail, password: authForm.password };
       const r = await fetch(endpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
       const raw = await r.text();
       let d = {};
@@ -1330,13 +1332,17 @@ export default function LumenWebBuilder() {
   const chip = on => ({ display:"inline-flex", alignItems:"center", padding:"7px 13px", borderRadius:20, fontSize:12, cursor:"pointer", margin:3, border:"1.5px solid " + (on ? "#2563EB" : "#E2E8F0"), background: on ? "#EFF6FF" : "rgba(255,255,255,0.7)", color: on ? "#2563EB" : "#64748B", transition:"all .15s" });
   const FLD  = { marginBottom:16 };
 
-  const industryMatchedBenchmarks = benchmarkCards
-    .filter((c) => isBenchmarkRelatedToIndustry(form.industry, c))
-    .filter((c) => form.businessMode === "auto" || c.business_mode === form.businessMode);
+  const industryMatchedBenchmarks = useMemo(() => (
+    benchmarkCards
+      .filter((c) => isBenchmarkRelatedToIndustry(form.industry, c))
+      .filter((c) => form.businessMode === "auto" || c.business_mode === form.businessMode)
+  ), [form.industry, form.businessMode]);
 
-  const recommendedBenchmarks = industryMatchedBenchmarks.length > 0
-    ? industryMatchedBenchmarks
-    : benchmarkCards.filter((c) => form.businessMode === "auto" || c.business_mode === form.businessMode);
+  const recommendedBenchmarks = useMemo(() => (
+    industryMatchedBenchmarks.length > 0
+      ? industryMatchedBenchmarks
+      : benchmarkCards.filter((c) => form.businessMode === "auto" || c.business_mode === form.businessMode)
+  ), [industryMatchedBenchmarks, form.businessMode]);
 
   useEffect(() => {
     if (!form.industry || recommendedBenchmarks.length === 0) return;
@@ -1345,7 +1351,7 @@ export default function LumenWebBuilder() {
       const first = recommendedBenchmarks[0];
       setForm((prev) => ({ ...prev, benchmarkSiteUrl: first.site_url, benchmarkSiteName: first.site_name || '' }));
     }
-  }, [form.industry, form.businessMode, recommendedBenchmarks.length]);
+  }, [form.industry, form.benchmarkSiteUrl, recommendedBenchmarks]);
 
   const openAdminMode = () => {
     setAccountTab('admin');
