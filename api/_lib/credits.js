@@ -1,6 +1,6 @@
 export const COSTS = {
   generate: 80,
-  regenerate: 30,
+  regenerate: 10,
   ai_image: 20,
   ai_text: 5,
   inline_edit: 3,
