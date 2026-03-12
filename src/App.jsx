@@ -694,7 +694,7 @@ function ApiKeyModal({ onSave, onClose }) {
   );
 }
 
-function AiImagePanel({ form, credit, setCredit, resultHtml, setResultHtml, openApiKeyModal, apiKey }) {
+function AiImagePanel({ form, credit, resultHtml, setResultHtml, openApiKeyModal, apiKey, consumeCredit }) {
   const [generating, setGenerating] = useState({});
   const [imgs, setImgs]             = useState({});
   const [errors, setErrors]         = useState({});
@@ -705,8 +705,8 @@ function AiImagePanel({ form, credit, setCredit, resultHtml, setResultHtml, open
     
     setGenerating(p => ({ ...p, [slot.id]: true }));
     setErrors(p => ({ ...p, [slot.id]: null }));
-    setCredit(c => c - COST_AI_IMAGE);
     try {
+      await consumeCredit('ai_image', COST_AI_IMAGE);
       const img = await generateDalleImage(slot.buildPrompt(form, korean), slot.size);
       setImgs(p => ({ ...p, [slot.id]: img }));
       if (resultHtml) {
@@ -714,7 +714,6 @@ function AiImagePanel({ form, credit, setCredit, resultHtml, setResultHtml, open
         setResultHtml(newHtml.replaceAll("__NEWIMG__", img));
       }
     } catch (e) {
-      setCredit(c => c + COST_AI_IMAGE);
       setErrors(p => ({ ...p, [slot.id]: e.message }));
     }
     setGenerating(p => ({ ...p, [slot.id]: false }));
@@ -766,7 +765,7 @@ function AiImagePanel({ form, credit, setCredit, resultHtml, setResultHtml, open
   );
 }
 
-function RightPanel({ credit, setCredit, form, resultHtml, setResultHtml, appliedFeatures, setAppliedFeatures, currentImages, setCurrentImages, apiKey, openApiKeyModal }) {
+function RightPanel({ credit, form, resultHtml, setResultHtml, appliedFeatures, setAppliedFeatures, currentImages, setCurrentImages, apiKey, openApiKeyModal, consumeCredit }) {
   const [tab, setTab]                 = useState("feature");
   const [loadingFeature, setLoading]  = useState(null);
   const [replacingImg, setReplacing]  = useState(false);
@@ -776,13 +775,15 @@ function RightPanel({ credit, setCredit, form, resultHtml, setResultHtml, applie
 
   const handleFeature = async (f) => {
     if (credit < f.cost || appliedFeatures.includes(f.id)) return;
-    setCredit(c => c - f.cost);
     setLoading(f.id);
     try {
+      await consumeCredit('feature', f.cost, { cost: f.cost });
       const html = await callClaude([{ role:"user", content:"다음 HTML에 기능 추가:\n" + f.prompt + "\n\n기존 HTML:\n" + resultHtml + "\n\nHTML만 출력." }]);
       setResultHtml(html);
       setAppliedFeatures(prev => [...prev, f.id]);
-    } catch { setCredit(c => c + f.cost); }
+    } catch (e) {
+      alert(e?.message || '기능 추가 실패');
+    }
     setLoading(null);
   };
 
@@ -808,9 +809,9 @@ function RightPanel({ credit, setCredit, form, resultHtml, setResultHtml, applie
 
   const handleTextEdit = async () => {
     if (!editInput.trim() || credit < COST_TEXT_EDIT || editLoading) return;
-    setCredit(c => c - COST_TEXT_EDIT);
     setEditLoading(true);
     try {
+      await consumeCredit('ai_text', COST_TEXT_EDIT);
       const html = await callClaude([{ role:"user", content:
         "다음 HTML에서 사용자가 요청한 문구 수정만 정확히 반영하세요.\n\n" +
         "=== 수정 요청 ===\n" + editInput.trim() + "\n\n" +
@@ -824,7 +825,6 @@ function RightPanel({ credit, setCredit, form, resultHtml, setResultHtml, applie
       setEditHistory(prev => [editInput.trim(), ...prev].slice(0, 10));
       setEditInput("");
     } catch (e) {
-      setCredit(c => c + COST_TEXT_EDIT);
       alert("수정 실패: " + e.message);
     }
     setEditLoading(false);
@@ -924,7 +924,7 @@ function RightPanel({ credit, setCredit, form, resultHtml, setResultHtml, applie
 
         {/* AI 이미지 생성 탭 */}
         {tab === "ai_image" && (
-          <AiImagePanel form={form} credit={credit} setCredit={setCredit} resultHtml={resultHtml} setResultHtml={setResultHtml} apiKey={apiKey} openApiKeyModal={openApiKeyModal} />
+          <AiImagePanel form={form} credit={credit} resultHtml={resultHtml} setResultHtml={setResultHtml} apiKey={apiKey} openApiKeyModal={openApiKeyModal} consumeCredit={consumeCredit} />
         )}
       </div>
     </div>
@@ -974,10 +974,15 @@ export default function LumenWebBuilder() {
     return () => window.removeEventListener("message", handler);
   }, []);
 
-  const startEditMode = () => {
+  const startEditMode = async () => {
     if (editConfirmed) {
       if (credit < COST_INLINE_EDIT) { alert("크레딧이 부족합니다 (" + COST_INLINE_EDIT + "C 필요)"); return; }
-      setCredit(c => c - COST_INLINE_EDIT);
+      try {
+        await consumeCredit('inline_edit', COST_INLINE_EDIT);
+      } catch (e) {
+        alert(e?.message || '크레딧 처리 실패');
+        return;
+      }
     }
     setEditMode(true);
     pendingHtml.current = "";
@@ -991,7 +996,6 @@ export default function LumenWebBuilder() {
   };
 
   const cancelEdit = () => {
-    if (editConfirmed) setCredit(c => c + COST_INLINE_EDIT);
     setEditMode(false);
     pendingHtml.current = "";
   };
@@ -1152,12 +1156,17 @@ export default function LumenWebBuilder() {
     setAuthLoading(false);
   }
 
-  async function useCredit(action) {
-    if (!authToken) throw new Error('로그인이 필요합니다.');
+  async function consumeCredit(action, fallbackCost = 0, extra = {}) {
+    if (!authToken) {
+      if (!fallbackCost) throw new Error('로그인이 필요합니다.');
+      if (credit < fallbackCost) throw new Error('크레딧 부족');
+      setCredit((prev) => prev - fallbackCost);
+      return { ok: true, local: true, cost: fallbackCost };
+    }
     const r = await fetch('/api/credits-use', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
-      body: JSON.stringify({ action }),
+      body: JSON.stringify({ action, ...extra }),
     });
     const raw = await r.text();
     let d = {};
@@ -1165,6 +1174,10 @@ export default function LumenWebBuilder() {
     if (!r.ok) throw new Error(d.error || '크레딧 처리 실패');
     await fetchMe(authToken);
     return d;
+  }
+
+  async function useCredit(action) {
+    return consumeCredit(action);
   }
 
   const [form, setForm] = useState({
@@ -1864,7 +1877,6 @@ export default function LumenWebBuilder() {
             </div>
             <RightPanel
               credit={credit}
-              setCredit={setCredit}
               form={form}
               resultHtml={resultHtml}
               setResultHtml={setResultHtml}
@@ -1874,6 +1886,7 @@ export default function LumenWebBuilder() {
               setCurrentImages={setCurImages}
               apiKey={null}
               openApiKeyModal={() => {}}
+              consumeCredit={consumeCredit}
             />
             <div style={{ background:"#fff", border:"1px solid #E2E8F0", borderRadius:12, padding:16 }}>
               <div style={{ display:'flex', gap:6, marginBottom:10 }}>

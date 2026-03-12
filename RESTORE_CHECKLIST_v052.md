@@ -12,12 +12,12 @@ Evidence format: `file :: function/component`
 | F-05 | Local template generation path (no external model required) | done | `src/api/localGenerator.js :: generateLocalHtml()` |
 | F-06 | Generation progress/log UX | done | `src/App.jsx :: runGenerate(), generating screen` |
 | F-07 | Result preview with desktop/tablet/mobile switching | done | `src/App.jsx :: result viewport controls` |
-| F-08 | Inline edit mode with first free edit and paid subsequent edits | done | `src/App.jsx :: makeEditableHtml(), startEditMode(), confirmEdit(), cancelEdit()` |
-| F-09 | AI text edit lane (+credit consumption) | done | `src/App.jsx :: RightPanel.handleTextEdit()` |
-| F-10 | Feature add-on lane (map/kakao/popup/sns/form/animation etc.) | done | `src/App.jsx :: FEATURES, RightPanel.handleFeature()` |
+| F-08 | Inline edit mode with first free edit and paid subsequent edits | done | `src/App.jsx :: makeEditableHtml(), startEditMode(), confirmEdit(), cancelEdit(), consumeCredit('inline_edit')` |
+| F-09 | AI text edit lane (+credit consumption) | done | `src/App.jsx :: RightPanel.handleTextEdit(), consumeCredit('ai_text')` |
+| F-10 | Feature add-on lane (map/kakao/popup/sns/form/animation etc.) | done | `src/App.jsx :: FEATURES, RightPanel.handleFeature(), consumeCredit('feature')` |
 | F-11 | Manual image replacement lane (logo/hero/products) | done | `src/App.jsx :: RightPanel.handleImgReplace(), ImageDropZone` |
-| F-12 | AI image generation lane (DALL·E slot generation + patch) | done | `src/App.jsx :: AiImagePanel.handle(), generateDalleImage()` |
-| F-13 | Credit accounting tied to server usage API | done | `src/App.jsx :: useCredit(), handleGenerate(), handleRegenerate()` |
+| F-12 | AI image generation lane (DALL·E slot generation + patch) | done | `src/App.jsx :: AiImagePanel.handle(), generateDalleImage(), consumeCredit('ai_image')` |
+| F-13 | Credit accounting tied to server usage API | done | `src/App.jsx :: consumeCredit()/useCredit(), handleGenerate(), handleRegenerate(), RightPanel/AiImagePanel credit lanes` |
 | F-14 | Auth core (login/signup/code/reset/me) | done | `src/App.jsx :: submitAuth(), sendAuthCode(), fetchMe()` + `api/auth-*.js` |
 | F-15 | Auth hardening: email normalization consistency | done | `src/App.jsx :: sendAuthCode(), submitAuth()` |
 | F-16 | In-session password change for logged-in users | done | `src/App.jsx :: ChangePasswordBox` + `api/auth-change-password.js` |
@@ -29,3 +29,4 @@ Evidence format: `file :: function/component`
 ## Notes
 - This Phase 2 pass focuses on restoring v0.5.2 functional parity while preserving current auth/admin stability and function-count constraints.
 - No API endpoints were added (function count remains 12).
+- `api/credits-use.js` now accepts bounded custom `cost` when `action='feature'`, so variable-cost feature add-ons are also server-accounted.

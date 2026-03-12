@@ -12,7 +12,11 @@ export default async function handler(req, res) {
     if (!payload?.id) return res.status(401).json({ error: 'unauthorized' });
 
     const { action } = req.body || {};
-    const cost = COSTS[action];
+    let cost = COSTS[action];
+    if (typeof cost !== 'number' && action === 'feature') {
+      const custom = Number(req.body?.cost);
+      if (Number.isFinite(custom) && custom > 0 && custom <= 50) cost = Math.round(custom);
+    }
     if (typeof cost !== 'number') return res.status(400).json({ error: 'invalid action' });
 
     if (dbMode() === 'memory') {
