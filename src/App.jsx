@@ -1422,17 +1422,16 @@ export default function LumenWebBuilder() {
               <div style={{ display:'flex', gap:8, marginBottom:8 }}>
                 <button style={{ ...BTNS, flex:1, background: authMode==='login' ? '#EFF6FF' : '#fff' }} onClick={() => setAuthMode('login')}>로그인</button>
                 <button style={{ ...BTNS, flex:1, background: authMode==='signup' ? '#EFF6FF' : '#fff' }} onClick={() => setAuthMode('signup')}>회원가입</button>
-                <button style={{ ...BTNS, flex:1, background: authMode==='forgot' ? '#EFF6FF' : '#fff' }} onClick={() => setAuthMode('forgot')}>비번재설정</button>
               </div>
 
               {authMode === 'signup' && <input style={{ ...INP, marginBottom:8 }} placeholder='이름' value={authForm.name} onChange={e => setAuthForm(f => ({...f, name:e.target.value}))} />}
 
               <div style={{ display:'flex', gap:8, marginBottom:6 }}>
                 <input style={{ ...INP, marginBottom:0, flex:1 }} placeholder='이메일' value={authForm.email} onChange={e => setAuthForm(f => ({...f, email:e.target.value}))} />
-                {(authMode === 'signup' || authMode === 'forgot') && (
+                {authMode === 'signup' && (
                   <button
                     style={{ ...BTNS, whiteSpace:'nowrap' }}
-                    onClick={() => checkEmailBeforeCode(authMode === 'signup' ? 'signup' : 'reset')}
+                    onClick={() => checkEmailBeforeCode('signup')}
                     disabled={checkingEmail}
                   >
                     {checkingEmail ? '확인중...' : '이메일 확인'}
@@ -1440,29 +1439,25 @@ export default function LumenWebBuilder() {
                 )}
               </div>
 
-              {(authMode === 'signup' || authMode === 'forgot') && emailChecked && (
+              {authMode === 'signup' && emailChecked && (
                 <div style={{ marginBottom:8, fontSize:11, color: emailCheckOk ? '#15803D' : '#DC2626' }}>
                   {emailCheckOk ? '✅ ' : '❌ '}{emailCheckMsg}
                 </div>
               )}
 
-              {(authMode === 'signup' || authMode === 'forgot') && (
+              {authMode === 'signup' && (
                 <div style={{ display:'flex', gap:8, marginBottom:8 }}>
                   <input style={{ ...INP, marginBottom:0, flex:1 }} placeholder='이메일 인증코드 6자리' value={authForm.code} onChange={e => setAuthForm(f => ({...f, code:e.target.value}))} />
-                  <button style={{ ...BTNS, whiteSpace:'nowrap' }} onClick={() => sendAuthCode(authMode === 'signup' ? 'signup' : 'reset')} disabled={codeSending || !emailCheckOk}>
+                  <button style={{ ...BTNS, whiteSpace:'nowrap' }} onClick={() => sendAuthCode('signup')} disabled={codeSending || !emailCheckOk}>
                     {codeSending ? '발송중...' : '코드발송'}
                   </button>
                 </div>
               )}
 
-              {authMode === 'forgot' ? (
-                <input type='password' style={{ ...INP, marginBottom:8 }} placeholder='새 비밀번호(8자 이상)' value={authForm.newPassword} onChange={e => setAuthForm(f => ({...f, newPassword:e.target.value}))} />
-              ) : (
-                <input type='password' style={{ ...INP, marginBottom:8 }} placeholder='비밀번호(8자 이상)' value={authForm.password} onChange={e => setAuthForm(f => ({...f, password:e.target.value}))} />
-              )}
+              <input type='password' style={{ ...INP, marginBottom:8 }} placeholder='비밀번호(8자 이상)' value={authForm.password} onChange={e => setAuthForm(f => ({...f, password:e.target.value}))} />
 
               <button style={BTNP} onClick={submitAuth} disabled={authLoading}>
-                {authLoading ? '처리 중...' : (authMode === 'signup' ? '이메일 인증 후 회원가입' : authMode === 'forgot' ? '비밀번호 재설정' : '로그인 후 시작')}
+                {authLoading ? '처리 중...' : (authMode === 'signup' ? '이메일 인증 후 회원가입' : '로그인 후 시작')}
               </button>
             </div>
           ) : (
