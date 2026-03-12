@@ -1,5 +1,23 @@
-import { saveCode, makeCode, createCodeToken } from '../lib/verification.js';
-import { sendEmail } from '../lib/email.js';
+import crypto from 'crypto';
+
+function b64url(input) {
+  return Buffer.from(input).toString('base64url');
+}
+
+function signToken(payload) {
+  const secret = process.env.AUTH_SECRET || 'change-this-auth-secret';
+  const body = b64url(JSON.stringify(payload));
+  const sig = crypto.createHmac('sha256', secret).update(body).digest('base64url');
+  return `${body}.${sig}`;
+}
+
+function makeCode() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+function hashCode(code) {
+  return crypto.createHash('sha256').update(String(code)).digest('hex');
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -10,25 +28,47 @@ export default async function handler(req, res) {
     if (!['signup', 'reset'].includes(purpose)) return res.status(400).json({ error: 'invalid purpose' });
 
     const code = makeCode();
-    const codeToken = createCodeToken(normalized, purpose, code, 10);
+    const codeToken = signToken({
+      kind: 'email-code',
+      email: normalized,
+      purpose,
+      codeHash: hashCode(code),
+      exp: Date.now() + 10 * 60 * 1000,
+    });
+
+    // 메일 서버 설정 여부와 관계없이 코드토큰 발급은 항상 성공 처리
+    // SMTP가 설정된 경우에만 실제 발송을 시도하고, 실패해도 가입 플로우는 진행 가능
+    let sent = false;
+    let skipped = true;
+    let mailError = null;
 
     try {
-      await saveCode(normalized, purpose, code, 10);
-    } catch {
-      // DB 저장 실패 시에도 token 검증으로 진행 가능
+      const host = process.env.SMTP_HOST;
+      const user = process.env.SMTP_USER;
+      const pass = process.env.SMTP_PASS;
+      if (host && user && pass) {
+        const nodemailer = await import('nodemailer');
+        const port = Number(process.env.SMTP_PORT || 587);
+        const transporter = nodemailer.default.createTransport({
+          host,
+          port,
+          secure: port === 465,
+          auth: { user, pass },
+        });
+        const from = process.env.SMTP_FROM || user;
+        const subject = purpose === 'signup' ? '[루멘] 회원가입 인증코드' : '[루멘] 비밀번호 재설정 인증코드';
+        const text = `인증코드: ${code}\n유효시간: 10분`;
+        await transporter.sendMail({ from, to: normalized, subject, text });
+        sent = true;
+        skipped = false;
+      }
+    } catch (e) {
+      mailError = String(e?.message || e);
+      sent = false;
+      skipped = true;
     }
 
-    const subject = purpose === 'signup' ? '[루멘] 회원가입 인증코드' : '[루멘] 비밀번호 재설정 인증코드';
-    const text = `인증코드: ${code}\n유효시간: 10분`;
-
-    let mailResult = { sent: false, skipped: true };
-    try {
-      mailResult = await sendEmail({ to: normalized, subject, text });
-    } catch (mailError) {
-      mailResult = { sent: false, skipped: true, error: String(mailError?.message || mailError) };
-    }
-
-    return res.status(200).json({ ok: true, sent: !!mailResult.sent, skipped: !!mailResult.skipped, codeToken, mailError: mailResult.error || null });
+    return res.status(200).json({ ok: true, sent, skipped, codeToken, mailError });
   } catch (e) {
     return res.status(500).json({ error: e.message || 'server error' });
   }
