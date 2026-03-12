@@ -1785,7 +1785,7 @@ export default function LumenWebBuilder() {
                 style={{ padding:"8px 14px", borderRadius:8, border:"none", background:"#fff", color:tc, fontSize:11, fontWeight:600, cursor:"pointer" }}>💾 HTML 다운로드</button>
             </div>
           </div>
-          <div style={{ display:"grid", gridTemplateColumns:"minmax(0,1fr) 310px 310px", gap:16, alignItems:"start" }}>
+          <div style={{ display:"grid", gridTemplateColumns:"minmax(0,1fr) 290px 290px", gap:12, alignItems:"start" }}>
             <div>
               {/* 인라인 편집 컨트롤 */}
               <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10, padding:"10px 14px", background: editMode ? "linear-gradient(135deg,#EEF2FF,#F0F9FF)" : "#fff", borderRadius:12, border: editMode ? "1.5px solid #2563EB" : "1px solid #E2E8F0" }}>
@@ -1914,8 +1914,10 @@ export default function LumenWebBuilder() {
                   <div style={{ fontSize:12, color:"#64748B", lineHeight:1.7, marginBottom:10 }}>
                     {me?.role === 'admin' ? '관리자 계정: 템플릿 생성 무제한' : `현재 크레딧: ${credit}C`}
                   </div>
-                  <button onClick={() => setShowPasswordModal(true)} style={{ marginTop:10, width:'100%', padding:'9px 10px', borderRadius:8, border:'1px solid #DBEAFE', background:'#EFF6FF', color:'#1D4ED8', cursor:'pointer', fontWeight:600 }}>비밀번호 변경</button>
-                  <button onClick={() => { localStorage.removeItem('lumen_token'); setAuthToken(''); setMe(null); setStep('intro'); setAccountTab('account'); }} style={{ marginTop:10, width:'100%', padding:'9px 10px', borderRadius:8, border:'1px solid #E2E8F0', background:'#fff', cursor:'pointer' }}>로그아웃</button>
+                  <div style={{ display:'flex', gap:8, marginTop:10 }}>
+                    <button onClick={() => setShowPasswordModal(true)} style={{ flex:1, padding:'9px 10px', borderRadius:8, border:'1px solid #DBEAFE', background:'#EFF6FF', color:'#1D4ED8', cursor:'pointer', fontWeight:600 }}>비밀번호 변경</button>
+                    <button onClick={() => { localStorage.removeItem('lumen_token'); setAuthToken(''); setMe(null); setStep('intro'); setAccountTab('account'); }} style={{ flex:1, padding:'9px 10px', borderRadius:8, border:'1px solid #E2E8F0', background:'#fff', cursor:'pointer' }}>로그아웃</button>
+                  </div>
                 </>
               )}
 
