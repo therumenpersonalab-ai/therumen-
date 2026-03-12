@@ -544,6 +544,58 @@ function AdminTransferBox({ authToken, onDone }) {
   );
 }
 
+function AdminUsersPanel({ authToken }) {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const r = await fetch('/api/admin-users', { headers: { Authorization: `Bearer ${authToken}` } });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || '사용자 조회 실패');
+      setUsers(Array.isArray(d.users) ? d.users : []);
+    } catch (e) {
+      alert(e.message || '사용자 조회 실패');
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => { if (authToken) load(); }, [authToken]);
+
+  return (
+    <div style={{ border:'1px solid #E2E8F0', borderRadius:10, padding:10, marginTop:10 }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
+        <div style={{ fontSize:12, fontWeight:700 }}>가입 계정 관리</div>
+        <button onClick={load} disabled={loading} style={{ padding:'6px 8px', borderRadius:8, border:'1px solid #E2E8F0', background:'#fff', cursor:'pointer', fontSize:11 }}>{loading ? '새로고침 중...' : '새로고침'}</button>
+      </div>
+      <div style={{ maxHeight:200, overflow:'auto', border:'1px solid #F1F5F9', borderRadius:8 }}>
+        <table style={{ width:'100%', borderCollapse:'collapse', fontSize:11 }}>
+          <thead style={{ position:'sticky', top:0, background:'#F8FAFC' }}>
+            <tr>
+              <th style={{ textAlign:'left', padding:'6px 8px', borderBottom:'1px solid #E2E8F0' }}>이메일</th>
+              <th style={{ textAlign:'left', padding:'6px 8px', borderBottom:'1px solid #E2E8F0' }}>권한</th>
+              <th style={{ textAlign:'right', padding:'6px 8px', borderBottom:'1px solid #E2E8F0' }}>크레딧</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((u) => (
+              <tr key={u.id}>
+                <td style={{ padding:'6px 8px', borderBottom:'1px solid #F1F5F9' }}>{u.email}</td>
+                <td style={{ padding:'6px 8px', borderBottom:'1px solid #F1F5F9' }}>{u.role === 'admin' ? '관리자' : '일반'}</td>
+                <td style={{ padding:'6px 8px', borderBottom:'1px solid #F1F5F9', textAlign:'right' }}>{u.role === 'admin' ? '∞' : `${u.credits}C`}</td>
+              </tr>
+            ))}
+            {users.length === 0 && (
+              <tr><td colSpan={3} style={{ padding:'10px 8px', textAlign:'center', color:'#64748B' }}>가입 계정이 없습니다.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 function ImageDropZone({ label, hint, multiple, value, onChange, compact }) {
   const ref = useRef();
   const [drag, setDrag] = useState(false);
@@ -1783,9 +1835,10 @@ export default function LumenWebBuilder() {
 
               {me?.role === 'admin' && accountTab === 'admin' && (
                 <>
-                  <div style={{ fontSize:14, fontWeight:700, color:'#1E293B', marginBottom:8 }}>관리자 탭</div>
-                  <div style={{ fontSize:12, color:'#64748B', marginBottom:8 }}>다른 계정에 무료 크레딧 지급</div>
+                  <div style={{ fontSize:14, fontWeight:700, color:'#1E293B', marginBottom:8 }}>관리자 모드</div>
+                  <div style={{ fontSize:12, color:'#64748B', marginBottom:8 }}>가입 계정 관리 및 크레딧 지급</div>
                   <AdminTransferBox authToken={authToken} onDone={() => fetchMe(authToken)} />
+                  <AdminUsersPanel authToken={authToken} />
                 </>
               )}
             </div>
