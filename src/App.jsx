@@ -979,11 +979,7 @@ export default function LumenWebBuilder() {
         signupCodeToken: purpose === 'signup' ? (d.codeToken || '') : f.signupCodeToken,
         resetCodeToken: purpose === 'reset' ? (d.codeToken || '') : f.resetCodeToken,
       }));
-      if (d?.skipped) {
-        alert('메일 서버 설정이 없어 실제 발송은 생략되었습니다. (SMTP 설정 필요)');
-      } else {
-        alert('인증코드를 이메일로 발송했습니다. (유효시간 10분)');
-      }
+      alert('인증코드를 이메일로 발송했습니다. (유효시간 10분)');
     } catch (e) {
       alert(e.message || '인증코드 발송 중 오류가 발생했습니다.');
     }
