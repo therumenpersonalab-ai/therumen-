@@ -42,6 +42,29 @@ function inferIndustry(text = '') {
   return '기업/비즈니스';
 }
 
+function mapToLumenIndustry(text = '') {
+  if (/카페|음식|푸드|베이커리|restaurant|cafe/i.test(text)) return '음식/카페';
+  if (/뷰티|미용|헤어|네일|beauty|salon/i.test(text)) return '뷰티/미용';
+  if (/병원|의료|헬스|health|clinic|care|fitness/i.test(text)) return '의료/헬스';
+  if (/학원|교육|수학|영어|입시|academy|education|consulting/i.test(text)) return '교육/학원';
+  if (/software|saas|it|tech|개발|플랫폼|가전/i.test(text)) return 'IT/소프트웨어';
+  if (/manufacturing|factory|제조|생산|부품|공정/i.test(text)) return '제조/생산';
+  if (/law|legal|tax|세무|법무|노무|컨설팅|consulting/i.test(text)) return '법무/세무/컨설팅';
+  if (/shop|store|상품|구매|마켓|브랜드|패션|잡화|d2c|e-?commerce/i.test(text)) return '쇼핑/이커머스';
+  if (/부동산|real estate|분양|매매|임대/i.test(text)) return '부동산';
+  if (/travel|hotel|숙박|리조트|투어|여행/i.test(text)) return '여행/숙박';
+  if (/pet|동물|식물|반려/i.test(text)) return '반려동물';
+  return '기타';
+}
+
+function normalizeCardForLumen(card) {
+  const hint = `${card.site_name || ''} ${card.industry_vertical || ''} ${card.business_mode || ''} ${card.visual_mood || ''}`;
+  return {
+    ...card,
+    lumen_industry: card.lumen_industry || mapToLumenIndustry(hint),
+  };
+}
+
 async function fetchText(url) {
   const res = await fetch(url, { headers: { 'user-agent': 'Mozilla/5.0 OpenClaw bot' } });
   if (!res.ok) throw new Error(`${url} ${res.status}`);
@@ -58,7 +81,7 @@ function extractImwebLinks(html = '') {
 
 async function run() {
   const analyzed = readJson(analyzedPath, { analyzed: [], lastRun: null, logs: [] });
-  const cards = readJson(benchPath, []);
+  const cards = readJson(benchPath, []).map(normalizeCardForLumen);
   const already = new Set(analyzed.analyzed);
 
   const listHtml = await fetchText(BEST_URL);
@@ -72,7 +95,7 @@ async function run() {
       const html = await fetchText(url);
       const host = new URL(url).hostname.replace('.imweb.me', '');
       const text = html.replace(/<[^>]+>/g, ' ').slice(0, 40000);
-      const card = {
+      const card = normalizeCardForLumen({
         site_name: host,
         site_url: url,
         industry_vertical: inferIndustry(text),
@@ -80,7 +103,7 @@ async function run() {
         key_modules: ['hero', 'category-or-sections', 'cta', 'contact'],
         visual_mood: 'auto-derived',
         analyzed_at: TODAY,
-      };
+      });
       cards.push(card);
       analyzed.analyzed.push(url);
       added.push(url);
@@ -96,9 +119,13 @@ async function run() {
   writeJson(benchPath, cards);
   writeJson(analyzedPath, analyzed);
 
-  if (added.length > 0) {
+  const changed = execSync('git status --porcelain data/benchmark_cards.json data/analyzed_urls.json', { encoding: 'utf8' }).trim();
+  if (changed) {
     execSync('git add data/benchmark_cards.json data/analyzed_urls.json', { stdio: 'inherit' });
-    execSync(`git commit -m "chore: daily imweb analysis (+${added.length} templates)"`, { stdio: 'inherit' });
+    const msg = added.length > 0
+      ? `chore: daily imweb analysis (+${added.length} templates)`
+      : 'chore: normalize benchmark cards for industry auto-mapping';
+    execSync(`git commit -m "${msg}"`, { stdio: 'inherit' });
     execSync('git push', { stdio: 'inherit' });
   }
 }

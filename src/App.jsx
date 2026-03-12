@@ -977,8 +977,9 @@ export default function LumenWebBuilder() {
 
   const isBenchmarkRelatedToIndustry = (industry, card) => {
     if (!industry || industry === '기타') return true;
+    if (card.lumen_industry && card.lumen_industry === industry) return true;
     const keys = INDUSTRY_TEMPLATE_MATCH[industry] || [];
-    const hay = `${card.industry_vertical || ''} ${card.visual_mood || ''}`;
+    const hay = `${card.industry_vertical || ''} ${card.visual_mood || ''} ${card.site_name || ''}`;
     return keys.some(k => hay.includes(k));
   };
 
