@@ -894,7 +894,9 @@ export default function LumenWebBuilder() {
         ? { email: authForm.email, password: authForm.password, name: authForm.name }
         : { email: authForm.email, password: authForm.password };
       const r = await fetch(endpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-      const d = await r.json();
+      const raw = await r.text();
+      let d = {};
+      try { d = raw ? JSON.parse(raw) : {}; } catch { d = { error: raw?.slice(0, 180) || '서버 응답 파싱 실패' }; }
       if (!r.ok) throw new Error(d.error || '인증 실패');
       localStorage.setItem('lumen_token', d.token);
       setAuthToken(d.token);
@@ -913,7 +915,9 @@ export default function LumenWebBuilder() {
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
       body: JSON.stringify({ action }),
     });
-    const d = await r.json();
+    const raw = await r.text();
+    let d = {};
+    try { d = raw ? JSON.parse(raw) : {}; } catch { d = { error: raw?.slice(0, 180) || '서버 응답 파싱 실패' }; }
     if (!r.ok) throw new Error(d.error || '크레딧 처리 실패');
     await fetchMe(authToken);
     return d;

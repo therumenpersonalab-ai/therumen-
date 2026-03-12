@@ -1,13 +1,25 @@
 import { Pool } from 'pg';
 
-const DATABASE_URL = process.env.DATABASE_URL;
-if (!DATABASE_URL) {
-  throw new Error('DATABASE_URL is required');
+let _pool = null;
+let initialized = false;
+
+function ensurePool() {
+  const DATABASE_URL = process.env.DATABASE_URL;
+  if (!DATABASE_URL) {
+    throw new Error('DATABASE_URL is required');
+  }
+  if (!_pool) {
+    _pool = new Pool({
+      connectionString: DATABASE_URL,
+      ssl: { rejectUnauthorized: false },
+    });
+  }
+  return _pool;
 }
 
-const pool = new Pool({ connectionString: DATABASE_URL, ssl: { rejectUnauthorized: false } });
-
-let initialized = false;
+export const pool = {
+  query: (...args) => ensurePool().query(...args),
+};
 
 export async function initDb() {
   if (initialized) return;
@@ -24,5 +36,3 @@ export async function initDb() {
   `);
   initialized = true;
 }
-
-export { pool };
