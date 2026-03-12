@@ -680,9 +680,9 @@ function ApiKeyModal({ onSave, onClose }) {
     <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.55)", zIndex:999, display:"flex", alignItems:"center", justifyContent:"center", padding:20 }}>
       <div style={{ background:"#fff", borderRadius:16, padding:"32px 28px", width:"100%", maxWidth:420, boxShadow:"0 20px 60px rgba(0,0,0,.2)" }}>
         <div style={{ fontSize:28, marginBottom:12 }}>🔑</div>
-        <h3 style={{ margin:"0 0 6px", fontSize:18, fontWeight:500, color:"#1E293B" }}>OpenAI API 키 입력</h3>
-        <p style={{ margin:"0 0 20px", fontSize:13, color:"#64748B", lineHeight:1.6 }}>DALL-E 3 이미지 생성에 필요합니다.<br />키는 이 세션에서만 사용되며 저장되지 않습니다.</p>
-        <input value={val} onChange={e => setVal(e.target.value)} placeholder="sk-proj-..." type="password"
+        <h3 style={{ margin:"0 0 6px", fontSize:18, fontWeight:500, color:"#1E293B" }}>AI 키 입력</h3>
+        <p style={{ margin:"0 0 20px", fontSize:13, color:"#64748B", lineHeight:1.6 }}>서버 AI 생성 연결에 필요합니다.<br />키는 이 세션에서만 사용되며 저장되지 않습니다.</p>
+        <input value={val} onChange={e => setVal(e.target.value)} placeholder="sk-..." type="password"
           style={{ width:"100%", padding:"12px 14px", borderRadius:10, border:"1.5px solid #E2E8F0", fontSize:14, outline:"none", boxSizing:"border-box", fontFamily:"monospace" }} />
         <div style={{ display:"flex", gap:10, marginTop:20 }}>
           <button onClick={onClose} style={{ flex:1, padding:"12px", borderRadius:10, border:"1.5px solid #E2E8F0", background:"#fff", color:"#64748B", fontSize:14, cursor:"pointer" }}>취소</button>
@@ -722,7 +722,7 @@ function AiImagePanel({ form, credit, resultHtml, setResultHtml, openApiKeyModal
   return (
     <div style={{ padding:"14px 16px" }}>
       <div style={{ fontSize:12, color:"#64748B", marginBottom:12, background:"#F0F9FF", borderRadius:8, padding:"10px 12px", border:"1px solid #BAE6FD" }}>
-        🎨 <strong style={{ color:"#0369A1" }}>DALL-E 3</strong>가 업종·테마에 맞는 이미지를 생성합니다.
+        🎨 <strong style={{ color:"#0369A1" }}>AI 맞춤 생성</strong>으로 업종·테마에 맞는 이미지를 생성합니다.
       </div>
       <div onClick={() => setKorean(v => !v)}
         style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"10px 12px", borderRadius:10, border:"1.5px solid " + (korean ? "#2563EB" : "#E2E8F0"), background: korean ? "#EFF6FF" : "#F8FAFC", cursor:"pointer", marginBottom:12 }}>
@@ -857,7 +857,7 @@ function RightPanel({ credit, form, resultHtml, setResultHtml, appliedFeatures, 
         {tab === "ai_edit" && (
           <div style={{ padding:"14px 16px" }}>
             <div style={{ fontSize:12, color:"#475569", marginBottom:10, lineHeight:1.7 }}>
-              AI가 복잡한 수정을 대신합니다. (FAQ 추가, 톤 변경, 섹션 재작성 등)
+              서버로 요청되면 에이레가 수정본을 만들어 자동 반영합니다. (FAQ 추가, 톤 변경, 섹션 재작성 등)
               <span style={{ display:"inline-block", background:"#EFF6FF", color:"#2563EB", padding:"1px 6px", borderRadius:4, fontSize:10, fontWeight:600, marginLeft:4 }}>{COST_TEXT_EDIT}C</span>
             </div>
             <textarea

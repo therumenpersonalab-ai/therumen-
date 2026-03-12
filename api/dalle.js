@@ -6,6 +6,7 @@ export default async function handler(req, res) {
     if (!apiKey) return res.status(400).json({ error: 'OpenAI API 키가 서버에 설정되지 않았습니다' });
 
     const { prompt, size } = req.body || {};
+    const safePrompt = `CRITICAL: Generate an image with absolutely NO text, NO letters, NO words, NO typography, NO logos, NO watermarks, NO signage. Image-only composition.\n\n${String(prompt || '')}`;
     const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
       headers: {
@@ -14,7 +15,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'dall-e-3',
-        prompt,
+        prompt: safePrompt,
         n: 1,
         size,
         quality: 'standard',
