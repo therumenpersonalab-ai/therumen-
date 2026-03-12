@@ -919,6 +919,7 @@ export default function LumenWebBuilder() {
       const d = await r.json();
       if (!r.ok) throw new Error(d.error || '인증 실패');
       setMe(d.user);
+      setAccountTab(d.user?.role === 'admin' ? 'admin' : 'account');
     } catch {
       localStorage.removeItem('lumen_token');
       setAuthToken('');
@@ -1055,6 +1056,7 @@ export default function LumenWebBuilder() {
       localStorage.setItem('lumen_token', d.token);
       setAuthToken(d.token);
       setMe(d.user);
+      setAccountTab(d.user?.role === 'admin' ? 'admin' : 'account');
       setStep('form');
     } catch (e) {
       alert(e.message);
