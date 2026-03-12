@@ -928,6 +928,16 @@ export default function LumenWebBuilder() {
     if (!authForm.email) return alert('이메일을 먼저 입력해주세요.');
     setCodeSending(true);
     try {
+      const checkRes = await fetch('/api/auth-check-email', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email: authForm.email, purpose }),
+      });
+      const checkRaw = await checkRes.text();
+      let checkData = {};
+      try { checkData = checkRaw ? JSON.parse(checkRaw) : {}; } catch { checkData = { error: checkRaw?.slice(0, 180) || '이메일 확인 실패' }; }
+      if (!checkRes.ok) throw new Error(checkData.error || '이메일 확인 실패');
+
       const r = await fetch('/api/auth-send-code', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
