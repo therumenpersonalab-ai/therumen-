@@ -4,16 +4,20 @@ import { initDb, pool, dbMode } from './_lib/db.js';
 import { signToken } from './_lib/auth.js';
 import { DEFAULT_SIGNUP_CREDITS } from './_lib/credits.js';
 import { isForcedAdminEmail } from './_lib/admin.js';
+import { verifyCode } from './_lib/verification.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   try {
     await initDb();
-    const { email, name, password } = req.body || {};
-    if (!email || !name || !password) return res.status(400).json({ error: '필수값 누락' });
+    const { email, name, password, code } = req.body || {};
+    if (!email || !name || !password || !code) return res.status(400).json({ error: '필수값 누락' });
     if (String(password).length < 8) return res.status(400).json({ error: '비밀번호 8자 이상' });
 
     const normalized = String(email).toLowerCase().trim();
+    const codeOk = await verifyCode(normalized, 'signup', code);
+    if (!codeOk) return res.status(400).json({ error: '이메일 인증코드가 올바르지 않거나 만료되었습니다.' });
+
     const exists = await pool.query('SELECT id FROM users WHERE email=$1', [normalized]);
     if (exists.rowCount > 0) return res.status(400).json({ error: '이미 가입된 이메일' });
 

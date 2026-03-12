@@ -850,8 +850,9 @@ export default function LumenWebBuilder() {
   const [authToken, setAuthToken]     = useState(() => localStorage.getItem("lumen_token") || "");
   const [me, setMe]                   = useState(null);
   const [authMode, setAuthMode]       = useState("login");
-  const [authForm, setAuthForm]       = useState({ email:"", password:"", name:"" });
+  const [authForm, setAuthForm]       = useState({ email:"", password:"", name:"", code:"", newPassword:"" });
   const [authLoading, setAuthLoading] = useState(false);
+  const [codeSending, setCodeSending] = useState(false);
 
   const [step, setStep]               = useState("intro");
   const [formStep, setFormStep]       = useState(0);
@@ -865,8 +866,8 @@ export default function LumenWebBuilder() {
   const [genProgress, setProgress]    = useState(0);
   const [resultHtml, setResultHtml]   = useState("");
   const [curImages, setCurImages]     = useState({ logo:null, hero:null, products:[] });
-  
-  
+  const [accountTab, setAccountTab]   = useState('account');
+
   const [viewport, setViewport]       = useState("desktop");
   const [editMode, setEditMode]       = useState(false);
   const [editConfirmed, setEditConfirmed] = useState(false);
@@ -923,12 +924,44 @@ export default function LumenWebBuilder() {
 
   useEffect(() => { fetchMe(authToken); }, [authToken]);
 
+  async function sendAuthCode(purpose) {
+    if (!authForm.email) return alert('이메일을 먼저 입력해주세요.');
+    setCodeSending(true);
+    try {
+      const r = await fetch('/api/auth-send-code', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email: authForm.email, purpose }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || '인증코드 발송 실패');
+      alert('인증코드를 이메일로 발송했습니다. (유효시간 10분)');
+    } catch (e) {
+      alert(e.message);
+    }
+    setCodeSending(false);
+  }
+
   async function submitAuth() {
     setAuthLoading(true);
     try {
+      if (authMode === 'forgot') {
+        const r = await fetch('/api/auth-reset-password', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ email: authForm.email, code: authForm.code, newPassword: authForm.newPassword }),
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error || '비밀번호 변경 실패');
+        alert('비밀번호가 변경되었습니다. 로그인 해주세요.');
+        setAuthMode('login');
+        setAuthForm(f => ({ ...f, password:'', code:'', newPassword:'' }));
+        return;
+      }
+
       const endpoint = authMode === 'signup' ? '/api/auth-signup' : '/api/auth-login';
       const payload = authMode === 'signup'
-        ? { email: authForm.email, password: authForm.password, name: authForm.name }
+        ? { email: authForm.email, password: authForm.password, name: authForm.name, code: authForm.code }
         : { email: authForm.email, password: authForm.password };
       const r = await fetch(endpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
       const raw = await r.text();
@@ -1204,11 +1237,31 @@ export default function LumenWebBuilder() {
               <div style={{ display:'flex', gap:8, marginBottom:8 }}>
                 <button style={{ ...BTNS, flex:1, background: authMode==='login' ? '#EFF6FF' : '#fff' }} onClick={() => setAuthMode('login')}>로그인</button>
                 <button style={{ ...BTNS, flex:1, background: authMode==='signup' ? '#EFF6FF' : '#fff' }} onClick={() => setAuthMode('signup')}>회원가입</button>
+                <button style={{ ...BTNS, flex:1, background: authMode==='forgot' ? '#EFF6FF' : '#fff' }} onClick={() => setAuthMode('forgot')}>비번재설정</button>
               </div>
+
               {authMode === 'signup' && <input style={{ ...INP, marginBottom:8 }} placeholder='이름' value={authForm.name} onChange={e => setAuthForm(f => ({...f, name:e.target.value}))} />}
+
               <input style={{ ...INP, marginBottom:8 }} placeholder='이메일' value={authForm.email} onChange={e => setAuthForm(f => ({...f, email:e.target.value}))} />
-              <input type='password' style={{ ...INP, marginBottom:8 }} placeholder='비밀번호(8자 이상)' value={authForm.password} onChange={e => setAuthForm(f => ({...f, password:e.target.value}))} />
-              <button style={BTNP} onClick={submitAuth} disabled={authLoading}>{authLoading ? '처리 중...' : (authMode === 'signup' ? '회원가입 후 시작' : '로그인 후 시작')}</button>
+
+              {(authMode === 'signup' || authMode === 'forgot') && (
+                <div style={{ display:'flex', gap:8, marginBottom:8 }}>
+                  <input style={{ ...INP, marginBottom:0, flex:1 }} placeholder='이메일 인증코드 6자리' value={authForm.code} onChange={e => setAuthForm(f => ({...f, code:e.target.value}))} />
+                  <button style={{ ...BTNS, whiteSpace:'nowrap' }} onClick={() => sendAuthCode(authMode === 'signup' ? 'signup' : 'reset')} disabled={codeSending}>
+                    {codeSending ? '발송중...' : '코드발송'}
+                  </button>
+                </div>
+              )}
+
+              {authMode === 'forgot' ? (
+                <input type='password' style={{ ...INP, marginBottom:8 }} placeholder='새 비밀번호(8자 이상)' value={authForm.newPassword} onChange={e => setAuthForm(f => ({...f, newPassword:e.target.value}))} />
+              ) : (
+                <input type='password' style={{ ...INP, marginBottom:8 }} placeholder='비밀번호(8자 이상)' value={authForm.password} onChange={e => setAuthForm(f => ({...f, password:e.target.value}))} />
+              )}
+
+              <button style={BTNP} onClick={submitAuth} disabled={authLoading}>
+                {authLoading ? '처리 중...' : (authMode === 'signup' ? '이메일 인증 후 회원가입' : authMode === 'forgot' ? '비밀번호 재설정' : '로그인 후 시작')}
+              </button>
             </div>
           ) : (
             <>
@@ -1602,14 +1655,36 @@ export default function LumenWebBuilder() {
               </div>
             </div>
             <div style={{ background:"#fff", border:"1px solid #E2E8F0", borderRadius:12, padding:16 }}>
-              <div style={{ fontSize:14, fontWeight:700, color:"#1E293B", marginBottom:8 }}>계정/크레딧</div>
-              <div style={{ fontSize:12, color:"#64748B", lineHeight:1.7, marginBottom:10 }}>
-                {me?.role === 'admin' ? '관리자 계정: 템플릿 생성 무제한' : `현재 크레딧: ${credit}C`}
+              <div style={{ display:'flex', gap:6, marginBottom:10 }}>
+                <button
+                  onClick={() => setAccountTab('account')}
+                  style={{ flex:1, padding:'7px 8px', borderRadius:8, border:'1px solid #E2E8F0', background:accountTab==='account' ? '#EFF6FF' : '#fff', cursor:'pointer', fontSize:12 }}
+                >계정</button>
+                {me?.role === 'admin' && (
+                  <button
+                    onClick={() => setAccountTab('admin')}
+                    style={{ flex:1, padding:'7px 8px', borderRadius:8, border:'1px solid #E2E8F0', background:accountTab==='admin' ? '#EFF6FF' : '#fff', cursor:'pointer', fontSize:12 }}
+                  >관리자 탭</button>
+                )}
               </div>
-              {me?.role === 'admin' && (
-                <AdminTransferBox authToken={authToken} onDone={() => fetchMe(authToken)} />
+
+              {(accountTab === 'account' || me?.role !== 'admin') && (
+                <>
+                  <div style={{ fontSize:14, fontWeight:700, color:"#1E293B", marginBottom:8 }}>계정/크레딧</div>
+                  <div style={{ fontSize:12, color:"#64748B", lineHeight:1.7, marginBottom:10 }}>
+                    {me?.role === 'admin' ? '관리자 계정: 템플릿 생성 무제한' : `현재 크레딧: ${credit}C`}
+                  </div>
+                  <button onClick={() => { localStorage.removeItem('lumen_token'); setAuthToken(''); setMe(null); setStep('intro'); setAccountTab('account'); }} style={{ marginTop:10, width:'100%', padding:'9px 10px', borderRadius:8, border:'1px solid #E2E8F0', background:'#fff', cursor:'pointer' }}>로그아웃</button>
+                </>
               )}
-              <button onClick={() => { localStorage.removeItem('lumen_token'); setAuthToken(''); setMe(null); setStep('intro'); }} style={{ marginTop:10, width:'100%', padding:'9px 10px', borderRadius:8, border:'1px solid #E2E8F0', background:'#fff', cursor:'pointer' }}>로그아웃</button>
+
+              {me?.role === 'admin' && accountTab === 'admin' && (
+                <>
+                  <div style={{ fontSize:14, fontWeight:700, color:'#1E293B', marginBottom:8 }}>관리자 탭</div>
+                  <div style={{ fontSize:12, color:'#64748B', marginBottom:8 }}>다른 계정에 무료 크레딧 지급</div>
+                  <AdminTransferBox authToken={authToken} onDone={() => fetchMe(authToken)} />
+                </>
+              )}
             </div>
           </div>
         </div>

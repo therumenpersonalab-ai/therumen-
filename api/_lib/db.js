@@ -81,6 +81,13 @@ export async function query(text, params = []) {
     u.role = role;
     return { rowCount: 1, rows: [{ id: u.id, email: u.email, role: u.role }] };
   }
+  if (sql.startsWith('update users set password_hash=')) {
+    const [hash, email] = params;
+    const u = mem.users.find((x) => x.email === String(email).toLowerCase());
+    if (!u) return { rowCount: 0, rows: [] };
+    u.password_hash = hash;
+    return { rowCount: 1, rows: [{ id: u.id, email: u.email }] };
+  }
 
   return { rowCount: 0, rows: [] };
 }
@@ -97,6 +104,16 @@ export async function initDb() {
         role TEXT NOT NULL DEFAULT 'user',
         credits INTEGER NOT NULL DEFAULT 200,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+    await query(`
+      CREATE TABLE IF NOT EXISTS email_verifications (
+        email TEXT NOT NULL,
+        purpose TEXT NOT NULL,
+        code_hash TEXT NOT NULL,
+        expires_at TIMESTAMPTZ NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        PRIMARY KEY (email, purpose)
       );
     `);
   }
