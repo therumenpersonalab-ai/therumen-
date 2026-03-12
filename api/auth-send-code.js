@@ -42,10 +42,19 @@ export default async function handler(req, res) {
     });
 
     if (!mail.ok) {
+      const diag = getMailDiagnostics();
+      const missing = [];
+      if (!diag.hostConfigured) missing.push('SMTP_HOST');
+      if (!diag.userConfigured) missing.push('SMTP_USER');
+      if (!diag.passConfigured) missing.push('SMTP_PASS');
+      if (!diag.fromConfigured) missing.push('SMTP_FROM');
+
       return res.status(503).json({
-        error: '인증코드 메일 발송에 실패했습니다. 잠시 후 다시 시도해주세요.',
+        error: '인증코드 메일 발송에 실패했습니다.',
         reason: mail.code,
-        diagnostics: getMailDiagnostics(),
+        details: mail.message,
+        missing,
+        diagnostics: diag,
       });
     }
 
