@@ -7,12 +7,12 @@ export default async function handler(req, res) {
     await initDb();
     const token = getBearerToken(req);
     const payload = verifyToken(token);
-    if (!payload) return res.status(401).json({ error: 'Unauthorized' });
+    if (!payload?.id) return res.status(401).json({ error: 'unauthorized' });
 
     const q = await pool.query('SELECT id,email,name,role,credits FROM users WHERE id=$1', [payload.id]);
-    if (!q.rowCount) return res.status(401).json({ error: 'Unauthorized' });
+    if (q.rowCount === 0) return res.status(401).json({ error: 'unauthorized' });
     return res.status(200).json({ user: q.rows[0] });
   } catch (e) {
-    return res.status(500).json({ error: e.message || '서버 오류' });
+    return res.status(500).json({ error: e.message || 'server error' });
   }
 }
