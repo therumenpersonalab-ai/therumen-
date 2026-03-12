@@ -20,6 +20,7 @@ export default async function handler(req, res) {
     const token = signToken({ id: u.id, email: u.email, role: u.role, exp: Date.now() + 1000 * 60 * 60 * 24 * 7 });
     return res.status(200).json({ token, user: { id: u.id, email: u.email, name: u.name, role: u.role, credits: u.credits } });
   } catch (e) {
-    return res.status(500).json({ error: e.message || 'server error' });
+    console.error('auth-login error:', e);
+    return res.status(500).json({ error: '로그인 처리 중 오류가 발생했습니다.' });
   }
 }

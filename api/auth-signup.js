@@ -26,6 +26,7 @@ export default async function handler(req, res) {
     const token = signToken({ id, email: normalized, role: 'user', exp: Date.now() + 1000 * 60 * 60 * 24 * 7 });
     return res.status(200).json({ token, user: { id, email: normalized, name, role: 'user', credits: DEFAULT_SIGNUP_CREDITS } });
   } catch (e) {
-    return res.status(500).json({ error: e.message || 'server error' });
+    console.error('auth-signup error:', e);
+    return res.status(500).json({ error: '회원가입 처리 중 오류가 발생했습니다.' });
   }
 }
