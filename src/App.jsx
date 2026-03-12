@@ -1779,7 +1779,7 @@ export default function LumenWebBuilder() {
                 style={{ padding:"8px 14px", borderRadius:8, border:"none", background:"#fff", color:tc, fontSize:11, fontWeight:600, cursor:"pointer" }}>💾 HTML 다운로드</button>
             </div>
           </div>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 310px", gap:16, alignItems:"start" }}>
+          <div style={{ display:"grid", gridTemplateColumns:"minmax(0,1fr) 310px 310px", gap:16, alignItems:"start" }}>
             <div>
               {/* 인라인 편집 컨트롤 */}
               <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10, padding:"10px 14px", background: editMode ? "linear-gradient(135deg,#EEF2FF,#F0F9FF)" : "#fff", borderRadius:12, border: editMode ? "1.5px solid #2563EB" : "1px solid #E2E8F0" }}>
