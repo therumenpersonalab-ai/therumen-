@@ -947,6 +947,14 @@ export default function LumenWebBuilder() {
 
   // postMessage로 iframe에서 편집된 HTML 수신
   useEffect(() => {
+    const host = window.location.hostname;
+    const isEphemeralVercel = /^therumen-[a-z0-9-]+-kimbumsoos-projects-a1101515\.vercel\.app$/i.test(host);
+    if (isEphemeralVercel) {
+      const target = `https://therumen.vercel.app${window.location.pathname}${window.location.search}${window.location.hash}`;
+      window.location.replace(target);
+      return;
+    }
+
     const handler = (e) => {
       if (e.data && e.data.type === "lumen-edit") {
         pendingHtml.current = e.data.html;
