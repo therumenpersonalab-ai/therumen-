@@ -933,11 +933,17 @@ export default function LumenWebBuilder() {
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ email: authForm.email, purpose }),
       });
-      const d = await r.json();
+      const raw = await r.text();
+      let d = {};
+      try { d = raw ? JSON.parse(raw) : {}; } catch { d = { error: raw?.slice(0, 180) || '서버 응답 파싱 실패' }; }
       if (!r.ok) throw new Error(d.error || '인증코드 발송 실패');
-      alert('인증코드를 이메일로 발송했습니다. (유효시간 10분)');
+      if (d?.skipped) {
+        alert('메일 서버 설정이 없어 실제 발송은 생략되었습니다. (SMTP 설정 필요)');
+      } else {
+        alert('인증코드를 이메일로 발송했습니다. (유효시간 10분)');
+      }
     } catch (e) {
-      alert(e.message);
+      alert(e.message || '인증코드 발송 중 오류가 발생했습니다.');
     }
     setCodeSending(false);
   }
