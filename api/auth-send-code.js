@@ -1,6 +1,6 @@
-import { initDb } from './_lib/db.js';
-import { saveCode, makeCode } from './_lib/verification.js';
-import { sendEmail } from './_lib/email.js';
+import { initDb } from '../lib/db.js';
+import { saveCode, makeCode } from '../lib/verification.js';
+import { sendEmail } from '../lib/email.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });

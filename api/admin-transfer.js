@@ -1,5 +1,5 @@
-import { initDb, pool } from './_lib/db.js';
-import { getBearerToken, verifyToken } from './_lib/auth.js';
+import { initDb, pool } from '../lib/db.js';
+import { getBearerToken, verifyToken } from '../lib/auth.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });

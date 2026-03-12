@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
-import { initDb, pool } from './_lib/db.js';
-import { verifyCode } from './_lib/verification.js';
+import { initDb, pool } from '../lib/db.js';
+import { verifyCode } from '../lib/verification.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });

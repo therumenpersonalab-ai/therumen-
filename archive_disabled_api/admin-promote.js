@@ -1,4 +1,4 @@
-import { initDb, pool } from './_lib/db.js';
+import { initDb, pool } from '../lib/db.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });

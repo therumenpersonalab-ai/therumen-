@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
-import { initDb, pool, dbMode } from './_lib/db.js';
-import { signToken } from './_lib/auth.js';
-import { isForcedAdminEmail } from './_lib/admin.js';
+import { initDb, pool, dbMode } from '../lib/db.js';
+import { signToken } from '../lib/auth.js';
+import { isForcedAdminEmail } from '../lib/admin.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });

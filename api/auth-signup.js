@@ -1,10 +1,10 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import { initDb, pool, dbMode } from './_lib/db.js';
-import { signToken } from './_lib/auth.js';
-import { DEFAULT_SIGNUP_CREDITS } from './_lib/credits.js';
-import { isForcedAdminEmail } from './_lib/admin.js';
-import { verifyCode } from './_lib/verification.js';
+import { initDb, pool, dbMode } from '../lib/db.js';
+import { signToken } from '../lib/auth.js';
+import { DEFAULT_SIGNUP_CREDITS } from '../lib/credits.js';
+import { isForcedAdminEmail } from '../lib/admin.js';
+import { verifyCode } from '../lib/verification.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
