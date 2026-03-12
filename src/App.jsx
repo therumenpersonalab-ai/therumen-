@@ -853,6 +853,10 @@ export default function LumenWebBuilder() {
   const [authForm, setAuthForm]       = useState({ email:"", password:"", name:"", code:"", newPassword:"", signupCodeToken:"", resetCodeToken:"" });
   const [authLoading, setAuthLoading] = useState(false);
   const [codeSending, setCodeSending] = useState(false);
+  const [checkingEmail, setCheckingEmail] = useState(false);
+  const [emailChecked, setEmailChecked] = useState(false);
+  const [emailCheckOk, setEmailCheckOk] = useState(false);
+  const [emailCheckMsg, setEmailCheckMsg] = useState('');
 
   const [step, setStep]               = useState("intro");
   const [formStep, setFormStep]       = useState(0);
@@ -924,9 +928,14 @@ export default function LumenWebBuilder() {
 
   useEffect(() => { fetchMe(authToken); }, [authToken]);
 
-  async function sendAuthCode(purpose) {
-    if (!authForm.email) return alert('이메일을 먼저 입력해주세요.');
-    setCodeSending(true);
+  async function checkEmailBeforeCode(purpose) {
+    if (!authForm.email) {
+      setEmailChecked(true);
+      setEmailCheckOk(false);
+      setEmailCheckMsg('이메일을 먼저 입력해주세요.');
+      return false;
+    }
+    setCheckingEmail(true);
     try {
       const checkRes = await fetch('/api/auth-check-email', {
         method:'POST',
@@ -937,7 +946,25 @@ export default function LumenWebBuilder() {
       let checkData = {};
       try { checkData = checkRaw ? JSON.parse(checkRaw) : {}; } catch { checkData = { error: checkRaw?.slice(0, 180) || '이메일 확인 실패' }; }
       if (!checkRes.ok) throw new Error(checkData.error || '이메일 확인 실패');
+      setEmailChecked(true);
+      setEmailCheckOk(true);
+      setEmailCheckMsg(purpose === 'signup' ? '가입 가능한 이메일입니다.' : '가입된 이메일이 확인되었습니다.');
+      return true;
+    } catch (e) {
+      setEmailChecked(true);
+      setEmailCheckOk(false);
+      setEmailCheckMsg(e.message || '이메일 확인 실패');
+      return false;
+    } finally {
+      setCheckingEmail(false);
+    }
+  }
 
+  async function sendAuthCode(purpose) {
+    const okCheck = await checkEmailBeforeCode(purpose);
+    if (!okCheck) return;
+    setCodeSending(true);
+    try {
       const r = await fetch('/api/auth-send-code', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
@@ -963,10 +990,17 @@ export default function LumenWebBuilder() {
     setCodeSending(false);
   }
 
+  useEffect(() => {
+    setEmailChecked(false);
+    setEmailCheckOk(false);
+    setEmailCheckMsg('');
+  }, [authForm.email, authMode]);
+
   async function submitAuth() {
     setAuthLoading(true);
     try {
       if (authMode === 'forgot') {
+        if (!emailCheckOk) throw new Error('이메일 확인을 먼저 진행해주세요.');
         const r = await fetch('/api/auth-reset-password', {
           method:'POST',
           headers:{'Content-Type':'application/json'},
@@ -981,6 +1015,7 @@ export default function LumenWebBuilder() {
       }
 
       const endpoint = authMode === 'signup' ? '/api/auth-signup' : '/api/auth-login';
+      if (authMode === 'signup' && !emailCheckOk) throw new Error('이메일 확인을 먼저 진행해주세요.');
       const payload = authMode === 'signup'
         ? { email: authForm.email, password: authForm.password, name: authForm.name, code: authForm.code, codeToken: authForm.signupCodeToken }
         : { email: authForm.email, password: authForm.password };
@@ -1263,12 +1298,29 @@ export default function LumenWebBuilder() {
 
               {authMode === 'signup' && <input style={{ ...INP, marginBottom:8 }} placeholder='이름' value={authForm.name} onChange={e => setAuthForm(f => ({...f, name:e.target.value}))} />}
 
-              <input style={{ ...INP, marginBottom:8 }} placeholder='이메일' value={authForm.email} onChange={e => setAuthForm(f => ({...f, email:e.target.value}))} />
+              <div style={{ display:'flex', gap:8, marginBottom:6 }}>
+                <input style={{ ...INP, marginBottom:0, flex:1 }} placeholder='이메일' value={authForm.email} onChange={e => setAuthForm(f => ({...f, email:e.target.value}))} />
+                {(authMode === 'signup' || authMode === 'forgot') && (
+                  <button
+                    style={{ ...BTNS, whiteSpace:'nowrap' }}
+                    onClick={() => checkEmailBeforeCode(authMode === 'signup' ? 'signup' : 'reset')}
+                    disabled={checkingEmail}
+                  >
+                    {checkingEmail ? '확인중...' : '이메일 확인'}
+                  </button>
+                )}
+              </div>
+
+              {(authMode === 'signup' || authMode === 'forgot') && emailChecked && (
+                <div style={{ marginBottom:8, fontSize:11, color: emailCheckOk ? '#15803D' : '#DC2626' }}>
+                  {emailCheckOk ? '✅ ' : '❌ '}{emailCheckMsg}
+                </div>
+              )}
 
               {(authMode === 'signup' || authMode === 'forgot') && (
                 <div style={{ display:'flex', gap:8, marginBottom:8 }}>
                   <input style={{ ...INP, marginBottom:0, flex:1 }} placeholder='이메일 인증코드 6자리' value={authForm.code} onChange={e => setAuthForm(f => ({...f, code:e.target.value}))} />
-                  <button style={{ ...BTNS, whiteSpace:'nowrap' }} onClick={() => sendAuthCode(authMode === 'signup' ? 'signup' : 'reset')} disabled={codeSending}>
+                  <button style={{ ...BTNS, whiteSpace:'nowrap' }} onClick={() => sendAuthCode(authMode === 'signup' ? 'signup' : 'reset')} disabled={codeSending || !emailCheckOk}>
                     {codeSending ? '발송중...' : '코드발송'}
                   </button>
                 </div>
