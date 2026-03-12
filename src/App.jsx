@@ -946,15 +946,15 @@ export default function LumenWebBuilder() {
     setForm(f => ({
       ...f,
       industry,
-      description: f.description || p.desc,
-      services: f.services || p.services,
-      target: f.target || p.target,
-      purpose: f.purpose.length > 0 ? f.purpose : p.purpose,
-      pages: f.pages.length > 0 ? f.pages : p.pages,
-      selectedTheme: f.selectedTheme || theme,
-      mood: theme ? theme.mood : f.mood,
-      introTone: f.introTone === "professional" ? p.tone : f.introTone,
-      illustStyle: p.illust || f.illustStyle,
+      description: p.desc || "",
+      services: p.services || "",
+      target: p.target || "",
+      purpose: p.purpose || [],
+      pages: p.pages || [],
+      selectedTheme: theme,
+      mood: theme ? theme.mood : "",
+      introTone: p.tone || "professional",
+      illustStyle: p.illust || "flat",
     }));
   };
 
