@@ -166,6 +166,8 @@ export default async function handler(req, res) {
     if (!messages || !Array.isArray(messages)) {
       return res.status(400).json({ error: 'messages가 필요합니다.' });
     }
+    const last = messages[messages.length - 1];
+    const raw = contentToText(last?.content);
 
     // 1) Anthropic 우선
     if (process.env.ANTHROPIC_API_KEY) {
@@ -209,6 +211,7 @@ export default async function handler(req, res) {
         html = `${html}\n${cont}`;
       }
 
+      html = applyLocalTransform(raw, html);
       return res.status(200).json({ html, usage: data.usage, provider: 'anthropic' });
     }
 
@@ -232,13 +235,12 @@ export default async function handler(req, res) {
       const html = stripCodeFence(String(data?.choices?.[0]?.message?.content || ''));
 
       if (html) {
-        return res.status(200).json({ html, usage: data?.usage, provider: 'openai-fallback' });
+        const patched = applyLocalTransform(raw, html);
+        return res.status(200).json({ html: patched, usage: data?.usage, provider: 'openai-fallback' });
       }
     }
 
     // 3) 무키/비정상 응답 fallback: 에이레 로컬 처리 (중단 방지)
-    const last = messages[messages.length - 1];
-    const raw = contentToText(last?.content);
     const baseHtml = extractHtmlFromRaw(raw);
     const html = applyLocalTransform(raw, baseHtml);
     return res.status(200).json({ html, provider: 'aere-local-fallback' });
