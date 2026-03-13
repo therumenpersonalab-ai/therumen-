@@ -225,7 +225,7 @@ export function generateLocalHtml(form, options = {}) {
     .filter(Boolean)
     .slice(0, 8);
 
-  const seed = `${form.company}-${industry}-${mode}-${options.extra || ""}`;
+  const seed = `${form.company}-${industry}-${mode}-${form.benchmarkSiteUrl || ''}-${form.selectedTheme?.id || ''}-${options.extra || ""}`;
   const heroLayout = pick(["split", "center", "banner", "split", "center"], seed + "hero");
   const ctaText = pick(["무료로 시작하기", "지금 상담하기", "바로 문의하기", "샘플 보기"], seed + "cta");
   const heroImage = form?.uploadedImages?.hero || "https://images.unsplash.com/photo-1551434678-e076c223a692?q=80&w=1400&auto=format&fit=crop";

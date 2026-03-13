@@ -4,7 +4,7 @@ import benchmarkCards from "../data/benchmark_cards.json";
 
 const INITIAL_CREDIT  = 200;
 const COST_GENERATE   = 80;
-const COST_REGENERATE = 30;
+const COST_REGENERATE = 5;
 const COST_AI_IMAGE   = 20;
 const COST_TEXT_EDIT   = 5;
 const COST_INLINE_EDIT = 3;
@@ -1004,6 +1004,9 @@ export default function LumenWebBuilder() {
   const [genLog, setGenLog]           = useState([]);
   const [genProgress, setProgress]    = useState(0);
   const [resultHtml, setResultHtml]   = useState("");
+  const [designHistory, setDesignHistory] = useState([]);
+  const [currentDesignId, setCurrentDesignId] = useState("");
+  const [usedBenchmarkUrls, setUsedBenchmarkUrls] = useState([]);
   const [curImages, setCurImages]     = useState({ logo:null, hero:null, products:[] });
   const [accountTab, setAccountTab]   = useState('account');
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -1276,14 +1279,15 @@ export default function LumenWebBuilder() {
   const upd    = (k, v) => setForm(f => ({ ...f, [k]: v }));
   const updImg = (k, v) => setForm(f => ({ ...f, uploadedImages: { ...f.uploadedImages, [k]: v } }));
   const toggleArr = (key, id) => setForm(f => ({ ...f, [key]: f[key].includes(id) ? f[key].filter(x => x !== id) : [...f[key], id] }));
-  const applyBenchmarkDefaults = (card) => {
+  const applyBenchmarkDefaults = (card, options = {}) => {
+    const { preserveTheme = false } = options;
     const style = getBenchmarkStylePreset(card, form.industry);
     setForm((prev) => ({
       ...prev,
       benchmarkSiteUrl: card.site_url,
       benchmarkSiteName: card.site_name || '',
-      selectedTheme: style.theme,
-      mood: style.theme?.mood || prev.mood,
+      selectedTheme: preserveTheme ? prev.selectedTheme : style.theme,
+      mood: (preserveTheme ? prev.selectedTheme?.mood : style.theme?.mood) || prev.mood,
       introTone: style.introTone,
       illustStyle: style.illustStyle,
     }));
@@ -1309,7 +1313,7 @@ export default function LumenWebBuilder() {
   };
 
   const pickAutoBenchmark = (list, options = {}) => {
-    const { excludeUrl = '' } = options;
+    const { excludeUrl = '', excludeUrls = [] } = options;
     if (!Array.isArray(list) || list.length === 0) return null;
 
     const currentThemeId = form.selectedTheme?.id || '';
@@ -1323,8 +1327,11 @@ export default function LumenWebBuilder() {
     };
     const preferredMoods = moodHints[currentThemeId] || [];
 
-    const scored = list
-      .filter((card) => !excludeUrl || card.site_url !== excludeUrl)
+    const blocked = new Set([excludeUrl, ...excludeUrls].filter(Boolean));
+    const baseList = list.filter((card) => !blocked.has(card.site_url));
+    const sourceList = baseList.length > 0 ? baseList : list;
+
+    const scored = sourceList
       .map((card) => {
         let score = 0;
         if (form.businessMode !== 'auto' && card.business_mode === form.businessMode) score += 4;
@@ -1379,6 +1386,24 @@ export default function LumenWebBuilder() {
     });
   };
 
+  const saveDesignSnapshot = (workingForm, finalHtml) => {
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const snapshot = {
+      id,
+      html: finalHtml,
+      form: {
+        benchmarkSiteUrl: workingForm.benchmarkSiteUrl,
+        benchmarkSiteName: workingForm.benchmarkSiteName,
+        selectedTheme: workingForm.selectedTheme,
+        introTone: workingForm.introTone,
+        illustStyle: workingForm.illustStyle,
+      },
+      createdAt: new Date().toISOString(),
+    };
+    setDesignHistory((prev) => [snapshot, ...prev]);
+    setCurrentDesignId(id);
+  };
+
   const runGenerate = async (extra, formOverride = null) => {
     const workingForm = formOverride || form;
     setStep("generating"); setGenLog([]); setProgress(0);
@@ -1419,6 +1444,7 @@ export default function LumenWebBuilder() {
       setProgress(100); setGenLog(prev => [...prev, LOG_MSGS[LOG_MSGS.length - 1]]);
       await new Promise(r => setTimeout(r, 500));
       setResultHtml(final);
+      saveDesignSnapshot(workingForm, final);
       setCurImages({ logo: workingForm.uploadedImages.logo, hero: workingForm.uploadedImages.hero, products: [...workingForm.uploadedImages.products] });
       setApplied([]); setEditConfirmed(false); setEditMode(false); setStep("result");
     } catch (e) { setGenLog(prev => [...prev, "❌ 오류: " + e.message]); }
@@ -1435,12 +1461,13 @@ export default function LumenWebBuilder() {
           ...form,
           benchmarkSiteUrl: autoPick.site_url,
           benchmarkSiteName: autoPick.site_name || '',
-          selectedTheme: style.theme,
-          mood: style.theme?.mood || form.mood,
+          selectedTheme: form.selectedTheme || style.theme,
+          mood: (form.selectedTheme?.mood || style.theme?.mood || form.mood),
           introTone: style.introTone,
           illustStyle: style.illustStyle,
         };
         setForm(nextForm);
+        setUsedBenchmarkUrls([autoPick.site_url]);
       }
       runGenerate('고객이 입력한 분위기/색감/업종에 맞는 레퍼런스를 자동 선별해 초안을 생성.', nextForm);
     } catch (e) {
@@ -1451,7 +1478,7 @@ export default function LumenWebBuilder() {
   const handleRegenerate = async () => {
     try {
       await useCredit('regenerate');
-      const pick = pickAutoBenchmark(recommendedBenchmarks, { excludeUrl: form.benchmarkSiteUrl });
+      const pick = pickAutoBenchmark(recommendedBenchmarks, { excludeUrl: form.benchmarkSiteUrl, excludeUrls: usedBenchmarkUrls });
       let nextForm = form;
       if (pick) {
         const style = getBenchmarkStylePreset(pick, form.industry);
@@ -1459,12 +1486,13 @@ export default function LumenWebBuilder() {
           ...form,
           benchmarkSiteUrl: pick.site_url,
           benchmarkSiteName: pick.site_name || '',
-          selectedTheme: style.theme,
-          mood: style.theme?.mood || form.mood,
+          selectedTheme: form.selectedTheme || style.theme,
+          mood: (form.selectedTheme?.mood || style.theme?.mood || form.mood),
           introTone: style.introTone,
           illustStyle: style.illustStyle,
         };
         setForm(nextForm);
+        setUsedBenchmarkUrls((prev) => [...new Set([...prev, pick.site_url])]);
       }
       runGenerate('이전 결과와 확실히 다르게, 자동 선별된 다른 레퍼런스를 적용해 섹션 순서/카드 스타일/히어로 구성을 바꿔 재생성.', nextForm);
     } catch (e) {
@@ -1515,6 +1543,19 @@ export default function LumenWebBuilder() {
       if (autoPick) applyBenchmarkDefaults(autoPick);
     }
   }, [form.industry, form.businessMode, form.selectedTheme, form.introTone, form.benchmarkSiteUrl, recommendedBenchmarks]);
+
+  const selectSavedDesign = (item) => {
+    setResultHtml(item.html);
+    setCurrentDesignId(item.id);
+    setForm((prev) => ({
+      ...prev,
+      benchmarkSiteUrl: item.form.benchmarkSiteUrl || prev.benchmarkSiteUrl,
+      benchmarkSiteName: item.form.benchmarkSiteName || prev.benchmarkSiteName,
+      selectedTheme: item.form.selectedTheme || prev.selectedTheme,
+      introTone: item.form.introTone || prev.introTone,
+      illustStyle: item.form.illustStyle || prev.illustStyle,
+    }));
+  };
 
   const openAdminMode = () => {
     setAccountTab('admin');
@@ -1934,6 +1975,28 @@ export default function LumenWebBuilder() {
                   <button onClick={() => { localStorage.removeItem('lumen_token'); setAuthToken(''); setMe(null); setStep('intro'); setAccountTab('account'); }} style={{ padding:"8px 14px", borderRadius:8, border:"1.5px solid rgba(255,255,255,.4)", background:"rgba(255,255,255,.12)", color:"#fff", fontSize:11, fontWeight:600, cursor:"pointer" }}>↩ 로그아웃</button>
                 </>
               )}
+            </div>
+          </div>
+          <div style={{ marginBottom:12, background:"#fff", border:"1px solid #E2E8F0", borderRadius:12, padding:"12px 14px" }}>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:8, gap:10, flexWrap:"wrap" }}>
+              <div style={{ fontSize:13, fontWeight:600, color:"#1E293B" }}>🗂️ 생성된 디자인 후보</div>
+              <div style={{ fontSize:11, color:"#64748B" }}>재생성할수록 후보가 누적되고, 원하는 안을 다시 선택할 수 있어요</div>
+            </div>
+            <div style={{ display:"flex", gap:8, overflowX:"auto", paddingBottom:2 }}>
+              {designHistory.map((item, idx) => {
+                const active = item.id === currentDesignId;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => selectSavedDesign(item)}
+                    style={{ minWidth:180, textAlign:"left", padding:"10px 12px", borderRadius:10, border:"1.5px solid " + (active ? tc : "#E2E8F0"), background:active ? (tc + "12") : "#F8FAFC", cursor:"pointer" }}
+                  >
+                    <div style={{ fontSize:12, fontWeight:600, color:active ? tc : "#1E293B" }}>시안 {designHistory.length - idx}</div>
+                    <div style={{ fontSize:10, color:"#64748B", marginTop:3 }}>{item.form.benchmarkSiteName || '자동 레퍼런스'}</div>
+                    <div style={{ fontSize:10, color:"#94A3B8", marginTop:2 }}>{item.form.selectedTheme?.name || '자동 테마'}</div>
+                  </button>
+                );
+              })}
             </div>
           </div>
           <div style={{ display:"grid", gridTemplateColumns:"minmax(0,1fr) 300px", gap:12, alignItems:"start" }}>
