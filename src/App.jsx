@@ -32,6 +32,7 @@ const THEMES = [
   { id:"deep_navy",      name:"🌊 Deep Navy",      desc:"학원·의원·컨설팅·IT",      primary:"#1B3A5C", secondary:"#F8F9FA", accent:"#4A90D9", bg:"#FFFFFF", text:"#1B3A5C", font:"Pretendard",     mood:"전문적/신뢰감",  btnBg:"#1B3A5C", btnText:"#fff", surfaceBg:"#F1F5F9", borderColor:"rgba(27,58,92,0.08)" },
   { id:"vibrant_energy", name:"⚡ Vibrant Energy", desc:"헬스·쇼핑·엔터테인먼트",   primary:"#FF6B35", secondary:"#FFF7ED", accent:"#FFD700", bg:"#FFFCFA", text:"#1A1A2E", font:"Pretendard",     mood:"활기/역동적",    btnBg:"#FF6B35", btnText:"#fff", surfaceBg:"#FFF7ED", borderColor:"rgba(26,26,46,0.08)" },
   { id:"natural_wood",   name:"🪵 Natural Wood",   desc:"공방·플로리스트·소품샵",   primary:"#8B6F47", secondary:"#FAF6F0", accent:"#6B8E6B", bg:"#FAF6F0", text:"#3D2B1F", font:"Noto Serif KR", mood:"단순/미니멀",    btnBg:"#8B6F47", btnText:"#fff", surfaceBg:"#F5EFE6", borderColor:"rgba(61,43,31,0.08)" },
+  { id:"tech_noir",      name:"🌌 Tech Noir",      desc:"three.js·AI·인터랙티브",   primary:"#0F172A", secondary:"#111827", accent:"#22D3EE", bg:"#020617", text:"#E2E8F0", font:"Pretendard",     mood:"미래형/몰입감",  btnBg:"#22D3EE", btnText:"#04111D", surfaceBg:"#0B1120", borderColor:"rgba(148,163,184,0.18)" },
 ];
 
 const ILLUST_STYLES = [
@@ -75,6 +76,32 @@ const MOOD_LABELS = {
   "corporate-tooling": "코퍼레이트 툴형 무드",
   "auto-derived": "균형형 비즈니스 무드",
 };
+
+const BENCHMARK_STYLE_PRESETS = {
+  editorial: { themeId:"natural_wood", introTone:"emotional", illustStyle:"line", heroType:"fullscreen" },
+  "minimal-premium": { themeId:"natural_wood", introTone:"professional", illustStyle:"minimal", heroType:"fullscreen" },
+  "image-immersive": { themeId:"tech_noir", introTone:"professional", illustStyle:"iso", heroType:"fullscreen" },
+  "minimal-editorial": { themeId:"natural_wood", introTone:"professional", illustStyle:"minimal", heroType:"fullscreen" },
+  "bold-d2c": { themeId:"vibrant_energy", introTone:"friendly", illustStyle:"flat", heroType:"fullscreen" },
+  "lifestyle-magazine": { themeId:"fresh_mint", introTone:"emotional", illustStyle:"line", heroType:"fullscreen" },
+  "friendly-trust": { themeId:"warm_rose", introTone:"friendly", illustStyle:"flat", heroType:"fullscreen" },
+  "corporate-tooling": { themeId:"tech_noir", introTone:"professional", illustStyle:"iso", heroType:"split" },
+  "auto-derived": { themeId:"deep_navy", introTone:"professional", illustStyle:"flat", heroType:"split" },
+};
+
+function getBenchmarkStylePreset(card, industry) {
+  const base = BENCHMARK_STYLE_PRESETS[card?.visual_mood] || BENCHMARK_STYLE_PRESETS['auto-derived'];
+  const industryPreset = INDUSTRY_PRESETS[industry] || INDUSTRY_PRESETS['기타'];
+  const useTechNoir = card?.source === 'threejs' || ['image-immersive', 'corporate-tooling'].includes(card?.visual_mood);
+  const themeId = useTechNoir ? 'tech_noir' : (base.themeId || industryPreset.themeId || 'deep_navy');
+  return {
+    theme: THEMES.find((t) => t.id === themeId) || THEMES.find((t) => t.id === industryPreset.themeId) || null,
+    introTone: base.introTone || industryPreset.tone || 'professional',
+    illustStyle: base.illustStyle || industryPreset.illust || 'flat',
+    heroType: base.heroType || industryPreset.heroType || 'split',
+    visualMood: card?.visual_mood || industryPreset.visualMood || 'corporate',
+  };
+}
 
 const PURPOSE_OPTIONS = [
   { id:"info",      label:"📋 정보 제공",   desc:"메뉴·위치·영업시간" },
@@ -177,8 +204,10 @@ function buildPrompt(form, extra) {
   const kakaoUrl = form.kakaoId ? "https://pf.kakao.com/_" + form.kakaoId + "/chat" : "";
   const hasCta = !!(form.kakaoId || form.naverUrl);
   const preset = INDUSTRY_PRESETS[form.industry] || {};
-  const visualMood = preset.visualMood || "corporate";
-  const heroType = preset.heroType || "split";
+  const benchmarkCard = benchmarkCards.find((c) => c.site_url === form.benchmarkSiteUrl);
+  const benchmarkStyle = benchmarkCard ? getBenchmarkStylePreset(benchmarkCard, form.industry) : null;
+  const visualMood = benchmarkStyle?.visualMood || preset.visualMood || "corporate";
+  const heroType = benchmarkStyle?.heroType || preset.heroType || "split";
 
   // 아임웹 시각 클러스터별 디자인 규칙
   const MOOD_RULES = {
@@ -1247,6 +1276,18 @@ export default function LumenWebBuilder() {
   const upd    = (k, v) => setForm(f => ({ ...f, [k]: v }));
   const updImg = (k, v) => setForm(f => ({ ...f, uploadedImages: { ...f.uploadedImages, [k]: v } }));
   const toggleArr = (key, id) => setForm(f => ({ ...f, [key]: f[key].includes(id) ? f[key].filter(x => x !== id) : [...f[key], id] }));
+  const applyBenchmarkDefaults = (card) => {
+    const style = getBenchmarkStylePreset(card, form.industry);
+    setForm((prev) => ({
+      ...prev,
+      benchmarkSiteUrl: card.site_url,
+      benchmarkSiteName: card.site_name || '',
+      selectedTheme: style.theme,
+      mood: style.theme?.mood || prev.mood,
+      introTone: style.introTone,
+      illustStyle: style.illustStyle,
+    }));
+  };
 
   const isBenchmarkRelatedToIndustry = (industry, card) => {
     if (!industry || industry === '기타') return true;
@@ -1414,8 +1455,7 @@ export default function LumenWebBuilder() {
     if (!form.industry || recommendedBenchmarks.length === 0) return;
     const stillValid = recommendedBenchmarks.some((c) => c.site_url === form.benchmarkSiteUrl);
     if (!stillValid) {
-      const first = recommendedBenchmarks[0];
-      setForm((prev) => ({ ...prev, benchmarkSiteUrl: first.site_url, benchmarkSiteName: first.site_name || '' }));
+      applyBenchmarkDefaults(recommendedBenchmarks[0]);
     }
   }, [form.industry, form.benchmarkSiteUrl, recommendedBenchmarks]);
 
@@ -1605,7 +1645,7 @@ export default function LumenWebBuilder() {
                   const on = form.benchmarkSiteUrl === b.site_url;
                   const mood = benchmarkMoodText(b, idx);
                   return (
-                    <button key={b.site_url} onClick={() => setForm(f => ({ ...f, benchmarkSiteUrl: b.site_url, benchmarkSiteName: b.site_name }))}
+                    <button key={b.site_url} onClick={() => applyBenchmarkDefaults(b)}
                       style={{ textAlign:"left", padding:"10px 11px", borderRadius:10, border:"1.5px solid " + (on ? "#2563EB" : "#E2E8F0"), background:on?"#EFF6FF":"#fff", cursor:"pointer" }}>
                       <div style={{ fontSize:12, fontWeight:600, color:on?"#2563EB":"#1E293B" }}>{mood.title}</div>
                       <div style={{ fontSize:10, color:"#64748B", marginTop:2 }}>{mood.subtitle}</div>
