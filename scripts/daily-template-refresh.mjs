@@ -10,9 +10,13 @@ const benchPath = path.join(DATA_DIR, 'benchmark_cards.json');
 
 const BEST_URL = 'https://imweb.me/best_production_list';
 const BEST_API_URL = 'https://imweb.me/_/api/io-legacy/ajax/get_best_production_list.cm';
+const THREE_EXAMPLES_URL = 'https://threejs.org/examples/';
+const THREE_FILES_URL = 'https://threejs.org/examples/files.json';
+const THREE_TAGS_URL = 'https://threejs.org/examples/tags.json';
 const TODAY = new Date().toISOString();
 const PAGE_SIZE = 24;
-const MAX_NEW_TEMPLATES = 20;
+const MAX_IMWEB_TEMPLATES = 20;
+const MAX_THREEJS_TEMPLATES = 10;
 const MAX_SCAN_PAGES = 10;
 
 function readJson(p, fallback) {
@@ -69,6 +73,37 @@ function normalizeCardForLumen(card) {
   };
 }
 
+function prettifyThreeName(file = '') {
+  return file
+    .replace(/^(webgl|webgpu|webaudio|css2d|css3d|misc|games|physics|svg|webxr|nodes|animation)_/i, '')
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function inferThreeMood(tags = [], file = '') {
+  const hint = `${tags.join(' ')} ${file}`.toLowerCase();
+  if (/(editor|gui|debug|performance|physics|instancing|lod|tool|node)/.test(hint)) return 'corporate-tooling';
+  if (/(postprocessing|water|ocean|particle|volumetric|shader|raymarching|portal)/.test(hint)) return 'image-immersive';
+  if (/(animation|skinning|morph|lines|ascii|halftone)/.test(hint)) return 'editorial';
+  return 'auto-derived';
+}
+
+function inferThreeMode(tags = [], file = '') {
+  const hint = `${tags.join(' ')} ${file}`.toLowerCase();
+  if (/(game|fps|car|vehicle|physics|terrain|vr|xr|character)/.test(hint)) return '행사/프로모션형';
+  if (/(editor|portfolio|gallery|museum|showroom)/.test(hint)) return '포트폴리오형';
+  if (/(webgpu|shader|postprocessing|material|animation|particles|effects)/.test(hint)) return '콘텐츠형';
+  return '포트폴리오형';
+}
+
+function inferThreeIndustry(tags = [], file = '') {
+  const hint = `${tags.join(' ')} ${file}`;
+  if (/medical|health|clinic/i.test(hint)) return '병원/케어';
+  if (/education|lesson|tutorial|fundamentals/i.test(hint)) return '교육/컨설팅';
+  if (/fashion|art|gallery|museum|design/i.test(hint)) return '패션/잡화';
+  return 'IT/가전';
+}
+
 async function fetchText(url) {
   const res = await fetch(url, { headers: { 'user-agent': 'Mozilla/5.0 OpenClaw bot' } });
   if (!res.ok) throw new Error(`${url} ${res.status}`);
@@ -96,11 +131,11 @@ async function fetchBestProductionPage(page, filter = '*') {
   return payload.data;
 }
 
-async function collectCandidateUrls(already = new Set()) {
+async function collectImwebCandidates(already = new Set()) {
   const candidates = [];
   const seen = new Set(already);
 
-  for (let page = 1; page <= MAX_SCAN_PAGES && candidates.length < MAX_NEW_TEMPLATES; page += 1) {
+  for (let page = 1; page <= MAX_SCAN_PAGES && candidates.length < MAX_IMWEB_TEMPLATES; page += 1) {
     const items = await fetchBestProductionPage(page);
     if (!items.length) break;
 
@@ -111,14 +146,50 @@ async function collectCandidateUrls(already = new Set()) {
       if (seen.has(url)) continue;
       seen.add(url);
       candidates.push({
+        source: 'imweb',
         url,
         subject: item?.subject || rawHost,
         categories: Array.isArray(item?.category) ? item.category : [],
       });
-      if (candidates.length >= MAX_NEW_TEMPLATES) break;
+      if (candidates.length >= MAX_IMWEB_TEMPLATES) break;
     }
 
     if (items.length < PAGE_SIZE) break;
+  }
+
+  return candidates;
+}
+
+async function collectThreeJsCandidates(already = new Set()) {
+  const [filesRes, tagsRes] = await Promise.all([
+    fetch(THREE_FILES_URL, { headers: { 'user-agent': 'Mozilla/5.0 OpenClaw bot', referer: THREE_EXAMPLES_URL } }),
+    fetch(THREE_TAGS_URL, { headers: { 'user-agent': 'Mozilla/5.0 OpenClaw bot', referer: THREE_EXAMPLES_URL } }),
+  ]);
+  if (!filesRes.ok) throw new Error(`${THREE_FILES_URL} ${filesRes.status}`);
+  if (!tagsRes.ok) throw new Error(`${THREE_TAGS_URL} ${tagsRes.status}`);
+
+  const files = await filesRes.json();
+  const tagsMap = await tagsRes.json();
+  const candidates = [];
+  const seen = new Set(already);
+  const preferredCategories = ['webgl', 'webgpu', 'css3d', 'css2d', 'misc', 'games', 'physics'];
+  const categoryNames = [...preferredCategories, ...Object.keys(files).filter((key) => !preferredCategories.includes(key))];
+
+  for (const category of categoryNames) {
+    const entries = Array.isArray(files[category]) ? files[category] : [];
+    for (const file of entries) {
+      const url = new URL(`${file}.html`, THREE_EXAMPLES_URL).toString();
+      if (seen.has(url)) continue;
+      seen.add(url);
+      candidates.push({
+        source: 'threejs',
+        url,
+        subject: prettifyThreeName(file),
+        categories: [category, ...(Array.isArray(tagsMap[file]) ? tagsMap[file] : [])],
+        file,
+      });
+      if (candidates.length >= MAX_THREEJS_TEMPLATES) return candidates;
+    }
   }
 
   return candidates;
@@ -129,35 +200,59 @@ async function run() {
   const cards = readJson(benchPath, []).map(normalizeCardForLumen);
   const already = new Set(analyzed.analyzed);
 
-  const targets = await collectCandidateUrls(already);
+  const targets = [
+    ...(await collectImwebCandidates(already)),
+    ...(await collectThreeJsCandidates(already)),
+  ];
   const added = [];
 
   for (const target of targets) {
-    const { url, subject, categories } = target;
+    const { source, url, subject, categories, file } = target;
     try {
       const html = await fetchText(url);
       const host = new URL(url).hostname.replace('.imweb.me', '');
       const text = html.replace(/<[^>]+>/g, ' ').slice(0, 40000);
-      const card = normalizeCardForLumen({
-        site_name: subject || host,
-        site_url: url,
-        source_categories: categories,
-        industry_vertical: inferIndustry(`${subject} ${categories.join(' ')} ${text}`),
-        business_mode: inferMode(`${subject} ${categories.join(' ')} ${text}`),
-        key_modules: ['hero', 'category-or-sections', 'cta', 'contact'],
-        visual_mood: 'auto-derived',
-        analyzed_at: TODAY,
-      });
+      const hint = `${subject} ${categories.join(' ')} ${text}`;
+      const card = normalizeCardForLumen(source === 'threejs'
+        ? {
+            site_name: subject || file || host,
+            site_url: url,
+            source: 'threejs',
+            source_type: 'interactive-reference',
+            source_categories: categories,
+            industry_vertical: inferThreeIndustry(categories, file),
+            business_mode: inferThreeMode(categories, file),
+            key_modules: ['3d-hero', 'interactive-canvas', 'motion-scene', 'cta'],
+            visual_mood: inferThreeMood(categories, file),
+            analyzed_at: TODAY,
+          }
+        : {
+            site_name: subject || host,
+            site_url: url,
+            source: 'imweb',
+            source_type: 'website-reference',
+            source_categories: categories,
+            industry_vertical: inferIndustry(hint),
+            business_mode: inferMode(hint),
+            key_modules: ['hero', 'category-or-sections', 'cta', 'contact'],
+            visual_mood: 'auto-derived',
+            analyzed_at: TODAY,
+          });
       cards.push(card);
       analyzed.analyzed.push(url);
-      added.push(url);
+      added.push({ source, url });
     } catch (e) {
-      analyzed.logs.push({ at: TODAY, url, error: String(e.message || e) });
+      analyzed.logs.push({ at: TODAY, source, url, error: String(e.message || e) });
     }
   }
 
+  const addedBySource = added.reduce((acc, item) => {
+    acc[item.source] = (acc[item.source] || 0) + 1;
+    return acc;
+  }, {});
+
   analyzed.lastRun = TODAY;
-  analyzed.logs.push({ at: TODAY, scannedPages: MAX_SCAN_PAGES, processed: targets.length, added: added.length });
+  analyzed.logs.push({ at: TODAY, scannedPages: MAX_SCAN_PAGES, processed: targets.length, added: added.length, addedBySource });
   analyzed.logs = analyzed.logs.slice(-200);
 
   writeJson(benchPath, cards);
@@ -167,7 +262,7 @@ async function run() {
   if (changed) {
     execSync('git add data/benchmark_cards.json data/analyzed_urls.json', { stdio: 'inherit' });
     const msg = added.length > 0
-      ? `chore: daily imweb analysis (+${added.length} templates)`
+      ? `chore: daily template analysis (+${added.length} templates)`
       : 'chore: normalize benchmark cards for industry auto-mapping';
     execSync(`git commit -m "${msg}"`, { stdio: 'inherit' });
     execSync('git push', { stdio: 'inherit' });
