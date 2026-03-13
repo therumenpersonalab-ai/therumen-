@@ -1308,6 +1308,39 @@ export default function LumenWebBuilder() {
     };
   };
 
+  const pickAutoBenchmark = (list, options = {}) => {
+    const { excludeUrl = '' } = options;
+    if (!Array.isArray(list) || list.length === 0) return null;
+
+    const currentThemeId = form.selectedTheme?.id || '';
+    const moodHints = {
+      tech_noir: ['image-immersive', 'corporate-tooling'],
+      natural_wood: ['editorial', 'minimal-premium', 'minimal-editorial'],
+      vibrant_energy: ['bold-d2c'],
+      warm_rose: ['friendly-trust'],
+      fresh_mint: ['lifestyle-magazine', 'editorial'],
+      deep_navy: ['corporate-tooling', 'auto-derived'],
+    };
+    const preferredMoods = moodHints[currentThemeId] || [];
+
+    const scored = list
+      .filter((card) => !excludeUrl || card.site_url !== excludeUrl)
+      .map((card) => {
+        let score = 0;
+        if (form.businessMode !== 'auto' && card.business_mode === form.businessMode) score += 4;
+        if (currentThemeId && getBenchmarkStylePreset(card, form.industry).theme?.id === currentThemeId) score += 3;
+        if (preferredMoods.includes(card.visual_mood)) score += 2;
+        if (form.introTone === 'professional' && ['corporate-tooling', 'auto-derived', 'image-immersive'].includes(card.visual_mood)) score += 1;
+        if (form.introTone === 'emotional' && ['editorial', 'lifestyle-magazine', 'minimal-premium'].includes(card.visual_mood)) score += 1;
+        if (form.introTone === 'friendly' && ['friendly-trust', 'bold-d2c', 'playful'].includes(card.visual_mood)) score += 1;
+        return { card, score };
+      });
+
+    const maxScore = Math.max(...scored.map((item) => item.score));
+    const topGroup = scored.filter((item) => item.score >= maxScore - 1).map((item) => item.card);
+    return topGroup[Math.floor(Math.random() * topGroup.length)] || scored[0]?.card || null;
+  };
+
   // 업종 선택 시 프리셋 자동 적용
   const applyPreset = (industry) => {
     const p = INDUSTRY_PRESETS[industry];
@@ -1394,7 +1427,22 @@ export default function LumenWebBuilder() {
   const handleGenerate = async () => {
     try {
       await useCredit('generate');
-      runGenerate('');
+      const autoPick = pickAutoBenchmark(recommendedBenchmarks) || recommendedBenchmarks[0] || null;
+      let nextForm = form;
+      if (autoPick) {
+        const style = getBenchmarkStylePreset(autoPick, form.industry);
+        nextForm = {
+          ...form,
+          benchmarkSiteUrl: autoPick.site_url,
+          benchmarkSiteName: autoPick.site_name || '',
+          selectedTheme: style.theme,
+          mood: style.theme?.mood || form.mood,
+          introTone: style.introTone,
+          illustStyle: style.illustStyle,
+        };
+        setForm(nextForm);
+      }
+      runGenerate('고객이 입력한 분위기/색감/업종에 맞는 레퍼런스를 자동 선별해 초안을 생성.', nextForm);
     } catch (e) {
       alert(e.message);
     }
@@ -1403,14 +1451,22 @@ export default function LumenWebBuilder() {
   const handleRegenerate = async () => {
     try {
       await useCredit('regenerate');
-      const alternates = recommendedBenchmarks.filter((b) => b.site_url !== form.benchmarkSiteUrl);
+      const pick = pickAutoBenchmark(recommendedBenchmarks, { excludeUrl: form.benchmarkSiteUrl });
       let nextForm = form;
-      if (alternates.length > 0) {
-        const pick = alternates[Math.floor(Math.random() * alternates.length)];
-        nextForm = { ...form, benchmarkSiteUrl: pick.site_url, benchmarkSiteName: pick.site_name || '' };
+      if (pick) {
+        const style = getBenchmarkStylePreset(pick, form.industry);
+        nextForm = {
+          ...form,
+          benchmarkSiteUrl: pick.site_url,
+          benchmarkSiteName: pick.site_name || '',
+          selectedTheme: style.theme,
+          mood: style.theme?.mood || form.mood,
+          introTone: style.introTone,
+          illustStyle: style.illustStyle,
+        };
         setForm(nextForm);
       }
-      runGenerate('이전 결과와 확실히 다르게, 현재 선택된 레퍼런스 템플릿 분위기를 강하게 반영해 재생성. 섹션 순서/카드 스타일/히어로 구성을 다르게 구성.', nextForm);
+      runGenerate('이전 결과와 확실히 다르게, 자동 선별된 다른 레퍼런스를 적용해 섹션 순서/카드 스타일/히어로 구성을 바꿔 재생성.', nextForm);
     } catch (e) {
       alert(e.message);
     }
@@ -1455,9 +1511,10 @@ export default function LumenWebBuilder() {
     if (!form.industry || recommendedBenchmarks.length === 0) return;
     const stillValid = recommendedBenchmarks.some((c) => c.site_url === form.benchmarkSiteUrl);
     if (!stillValid) {
-      applyBenchmarkDefaults(recommendedBenchmarks[0]);
+      const autoPick = pickAutoBenchmark(recommendedBenchmarks) || recommendedBenchmarks[0];
+      if (autoPick) applyBenchmarkDefaults(autoPick);
     }
-  }, [form.industry, form.benchmarkSiteUrl, recommendedBenchmarks]);
+  }, [form.industry, form.businessMode, form.selectedTheme, form.introTone, form.benchmarkSiteUrl, recommendedBenchmarks]);
 
   const openAdminMode = () => {
     setAccountTab('admin');
@@ -1639,20 +1696,10 @@ export default function LumenWebBuilder() {
               </div>
             </div>
             <div style={FLD}>
-              <label style={LBL}>추천 레퍼런스 템플릿 (자동 누적 데이터 반영)</label>
-              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
-                {recommendedBenchmarks.map((b, idx) => {
-                  const on = form.benchmarkSiteUrl === b.site_url;
-                  const mood = benchmarkMoodText(b, idx);
-                  return (
-                    <button key={b.site_url} onClick={() => applyBenchmarkDefaults(b)}
-                      style={{ textAlign:"left", padding:"10px 11px", borderRadius:10, border:"1.5px solid " + (on ? "#2563EB" : "#E2E8F0"), background:on?"#EFF6FF":"#fff", cursor:"pointer" }}>
-                      <div style={{ fontSize:12, fontWeight:600, color:on?"#2563EB":"#1E293B" }}>{mood.title}</div>
-                      <div style={{ fontSize:10, color:"#64748B", marginTop:2 }}>{mood.subtitle}</div>
-                      {mood.modules && <div style={{ fontSize:10, color:"#94A3B8", marginTop:2 }}>구성: {mood.modules}</div>}
-                    </button>
-                  );
-                })}
+              <label style={LBL}>레퍼런스 적용 방식</label>
+              <div style={{ padding:"12px 14px", background:"#F8FAFC", border:"1px solid #E2E8F0", borderRadius:12, fontSize:12, color:"#475569", lineHeight:1.8 }}>
+                고객이 원하는 <strong style={{ color:"#2563EB" }}>분위기·색감·업종·운영 목적</strong>에 맞는 레퍼런스를 내부에서 자동 선별해 초안에 적용합니다.<br />
+                재생성을 누르면 같은 카테고리 안에서 <strong style={{ color:"#2563EB" }}>다른 레퍼런스가 랜덤 적용</strong>됩니다.
               </div>
             </div>
             <div style={FLD}>
@@ -1764,7 +1811,7 @@ export default function LumenWebBuilder() {
                 <strong>{form.company || "(상호명)"}</strong> · {form.industry}<br />
                 테마: {form.selectedTheme ? form.selectedTheme.name : "자동"} · 모드: {form.businessMode === "auto" ? "자동 추천" : form.businessMode} · 톤: {(INTRO_TONES.find(t => t.id === form.introTone) || {}).label}<br />
                 구성: {form.pages.map(id => (PAGE_OPTIONS.find(p => p.id === id) || {}).label).join(", ")}<br />
-                {form.benchmarkSiteName ? "🧩 레퍼런스: " + form.benchmarkSiteName + "  " : ""}
+                {form.benchmarkSiteName ? "🧩 자동 선별 레퍼런스: " + form.benchmarkSiteName + "  " : ""}
                 {form.kakaoId ? "💬 @" + form.kakaoId + "  " : ""}{form.naverUrl ? "📅 네이버예약  " : ""}
                 {form.uploadedImages.logo ? "🏷️ 로고  " : ""}{form.uploadedImages.hero ? "🖼️ 히어로  " : ""}
                 {form.uploadedImages.products.length > 0 ? "📦 제품 " + form.uploadedImages.products.length + "장" : ""}
