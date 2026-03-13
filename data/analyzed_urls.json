@@ -61,9 +61,39 @@
     "https://threejs.org/examples/webgl_animation_walk.html",
     "https://threejs.org/examples/webgl_batch_lod_bvh.html",
     "https://threejs.org/examples/webgl_camera.html",
-    "https://threejs.org/examples/webgl_camera_array.html"
+    "https://threejs.org/examples/webgl_camera_array.html",
+    "https://ssoads.imweb.me/",
+    "https://processitw.imweb.me/",
+    "https://1day1message.imweb.me/",
+    "https://winterrace.imweb.me/",
+    "https://kkaemukkaemu.imweb.me/",
+    "https://osafemall.imweb.me/",
+    "https://urdokzone.imweb.me/",
+    "https://machineartificial.imweb.me/",
+    "https://eurodiet.imweb.me/",
+    "https://swedencoffee.imweb.me/",
+    "https://lowpoint.imweb.me/",
+    "https://achimidang.imweb.me/",
+    "https://manlab-production.imweb.me/",
+    "https://ellelipstick.imweb.me/",
+    "https://citrian.imweb.me/",
+    "https://eternalog.imweb.me/",
+    "https://secondtrack.imweb.me/",
+    "https://odell.imweb.me/",
+    "https://capo.imweb.me/",
+    "https://seochoncommon52039.imweb.me/",
+    "https://threejs.org/examples/webgl_camera_logarithmicdepthbuffer.html",
+    "https://threejs.org/examples/webgl_clipping.html",
+    "https://threejs.org/examples/webgl_clipping_advanced.html",
+    "https://threejs.org/examples/webgl_clipping_intersection.html",
+    "https://threejs.org/examples/webgl_clipping_stencil.html",
+    "https://threejs.org/examples/webgl_decals.html",
+    "https://threejs.org/examples/webgl_depth_texture.html",
+    "https://threejs.org/examples/webgl_effects_anaglyph.html",
+    "https://threejs.org/examples/webgl_effects_ascii.html",
+    "https://threejs.org/examples/webgl_effects_parallaxbarrier.html"
   ],
-  "lastRun": "2026-03-13T08:01:50.050Z",
+  "lastRun": "2026-03-13T08:07:45.157Z",
   "logs": [
     {
       "at": "2026-03-11T15:30:06.611Z",
@@ -118,6 +148,16 @@
     },
     {
       "at": "2026-03-13T08:01:50.050Z",
+      "scannedPages": 10,
+      "processed": 30,
+      "added": 30,
+      "addedBySource": {
+        "imweb": 20,
+        "threejs": 10
+      }
+    },
+    {
+      "at": "2026-03-13T08:07:45.157Z",
       "scannedPages": 10,
       "processed": 30,
       "added": 30,

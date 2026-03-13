@@ -1142,5 +1142,613 @@
     "visual_mood": "auto-derived",
     "analyzed_at": "2026-03-13T08:01:50.050Z",
     "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "쏘애즈 SSOads",
+    "site_url": "https://ssoads.imweb.me/",
+    "source": "imweb",
+    "source_type": "website-reference",
+    "source_categories": [
+      "COMPANY"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "판매형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "Process ITW - 복합문화공간 프로세스 이태원",
+    "site_url": "https://processitw.imweb.me/",
+    "source": "imweb",
+    "source_type": "website-reference",
+    "source_categories": [
+      "INTERIOR",
+      "LIFE"
+    ],
+    "industry_vertical": "인테리어/건축",
+    "business_mode": "판매형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "1Day 1Message",
+    "site_url": "https://1day1message.imweb.me/",
+    "source": "imweb",
+    "source_type": "website-reference",
+    "source_categories": [
+      "EDUCATION"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "판매형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "2024 겨울왕국 레이스",
+    "site_url": "https://winterrace.imweb.me/",
+    "source": "imweb",
+    "source_type": "website-reference",
+    "source_categories": [
+      "WEDDING"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "판매형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "귀엽고 맛있는 깨무깨무",
+    "site_url": "https://kkaemukkaemu.imweb.me/",
+    "source": "imweb",
+    "source_type": "website-reference",
+    "source_categories": [
+      "LIFE"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "소개/문의형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "OSAFEMALL",
+    "site_url": "https://osafemall.imweb.me/",
+    "source": "imweb",
+    "source_type": "website-reference",
+    "source_categories": [
+      "FASHION"
+    ],
+    "industry_vertical": "패션/잡화",
+    "business_mode": "소개/문의형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "쇼핑/이커머스"
+  },
+  {
+    "site_name": "유아독존",
+    "site_url": "https://urdokzone.imweb.me/",
+    "source": "imweb",
+    "source_type": "website-reference",
+    "source_categories": [
+      "FASHION"
+    ],
+    "industry_vertical": "패션/잡화",
+    "business_mode": "소개/문의형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "쇼핑/이커머스"
+  },
+  {
+    "site_name": "Machine Synthesis Collective(MSC)",
+    "site_url": "https://machineartificial.imweb.me/",
+    "source": "imweb",
+    "source_type": "website-reference",
+    "source_categories": [
+      "FASHION"
+    ],
+    "industry_vertical": "패션/잡화",
+    "business_mode": "판매형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "쇼핑/이커머스"
+  },
+  {
+    "site_name": "유로디에트",
+    "site_url": "https://eurodiet.imweb.me/",
+    "source": "imweb",
+    "source_type": "website-reference",
+    "source_categories": [
+      "FOOD"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "소개/문의형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "뷰클런즈",
+    "site_url": "https://swedencoffee.imweb.me/",
+    "source": "imweb",
+    "source_type": "website-reference",
+    "source_categories": [
+      "FOOD"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "소개/문의형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "로우포인트",
+    "site_url": "https://lowpoint.imweb.me/",
+    "source": "imweb",
+    "source_type": "website-reference",
+    "source_categories": [
+      "FASHION",
+      "INTERIOR"
+    ],
+    "industry_vertical": "인테리어/건축",
+    "business_mode": "소개/문의형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "기타"
+  },
+  {
+    "site_name": "아치미당",
+    "site_url": "https://achimidang.imweb.me/",
+    "source": "imweb",
+    "source_type": "website-reference",
+    "source_categories": [
+      "FOOD"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "소개/문의형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "무선충전기 - 만렙",
+    "site_url": "https://manlab-production.imweb.me/",
+    "source": "imweb",
+    "source_type": "website-reference",
+    "source_categories": [
+      "IT"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "소개/문의형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "엘르 립스틱",
+    "site_url": "https://ellelipstick.imweb.me/",
+    "source": "imweb",
+    "source_type": "website-reference",
+    "source_categories": [
+      "BEAUTY"
+    ],
+    "industry_vertical": "뷰티",
+    "business_mode": "커뮤니티형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "뷰티/미용"
+  },
+  {
+    "site_name": "시트리앙",
+    "site_url": "https://citrian.imweb.me/",
+    "source": "imweb",
+    "source_type": "website-reference",
+    "source_categories": [
+      "FOOD"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "커뮤니티형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "Eternalog",
+    "site_url": "https://eternalog.imweb.me/",
+    "source": "imweb",
+    "source_type": "website-reference",
+    "source_categories": [
+      "LIFE"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "커뮤니티형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "세컨드트랙",
+    "site_url": "https://secondtrack.imweb.me/",
+    "source": "imweb",
+    "source_type": "website-reference",
+    "source_categories": [
+      "ART"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "소개/문의형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "ODELL",
+    "site_url": "https://odell.imweb.me/",
+    "source": "imweb",
+    "source_type": "website-reference",
+    "source_categories": [
+      "INTERIOR"
+    ],
+    "industry_vertical": "인테리어/건축",
+    "business_mode": "커뮤니티형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "기타"
+  },
+  {
+    "site_name": "couch potato",
+    "site_url": "https://capo.imweb.me/",
+    "source": "imweb",
+    "source_type": "website-reference",
+    "source_categories": [
+      "FASHION"
+    ],
+    "industry_vertical": "패션/잡화",
+    "business_mode": "소개/문의형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "쇼핑/이커머스"
+  },
+  {
+    "site_name": "서촌브랜드위크",
+    "site_url": "https://seochoncommon52039.imweb.me/",
+    "source": "imweb",
+    "source_type": "website-reference",
+    "source_categories": [
+      "PROMOTION"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "판매형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "Camera Logarithmicdepthbuffer",
+    "site_url": "https://threejs.org/examples/webgl_camera_logarithmicdepthbuffer.html",
+    "source": "threejs",
+    "source_type": "interactive-reference",
+    "source_categories": [
+      "webgl"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "포트폴리오형",
+    "key_modules": [
+      "3d-hero",
+      "interactive-canvas",
+      "motion-scene",
+      "cta"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "Clipping",
+    "site_url": "https://threejs.org/examples/webgl_clipping.html",
+    "source": "threejs",
+    "source_type": "interactive-reference",
+    "source_categories": [
+      "webgl",
+      "solid"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "포트폴리오형",
+    "key_modules": [
+      "3d-hero",
+      "interactive-canvas",
+      "motion-scene",
+      "cta"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "Clipping Advanced",
+    "site_url": "https://threejs.org/examples/webgl_clipping_advanced.html",
+    "source": "threejs",
+    "source_type": "interactive-reference",
+    "source_categories": [
+      "webgl",
+      "solid"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "포트폴리오형",
+    "key_modules": [
+      "3d-hero",
+      "interactive-canvas",
+      "motion-scene",
+      "cta"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "Clipping Intersection",
+    "site_url": "https://threejs.org/examples/webgl_clipping_intersection.html",
+    "source": "threejs",
+    "source_type": "interactive-reference",
+    "source_categories": [
+      "webgl",
+      "solid"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "포트폴리오형",
+    "key_modules": [
+      "3d-hero",
+      "interactive-canvas",
+      "motion-scene",
+      "cta"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "Clipping Stencil",
+    "site_url": "https://threejs.org/examples/webgl_clipping_stencil.html",
+    "source": "threejs",
+    "source_type": "interactive-reference",
+    "source_categories": [
+      "webgl",
+      "solid"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "포트폴리오형",
+    "key_modules": [
+      "3d-hero",
+      "interactive-canvas",
+      "motion-scene",
+      "cta"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "Decals",
+    "site_url": "https://threejs.org/examples/webgl_decals.html",
+    "source": "threejs",
+    "source_type": "interactive-reference",
+    "source_categories": [
+      "webgl",
+      "normals"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "포트폴리오형",
+    "key_modules": [
+      "3d-hero",
+      "interactive-canvas",
+      "motion-scene",
+      "cta"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "Depth Texture",
+    "site_url": "https://threejs.org/examples/webgl_depth_texture.html",
+    "source": "threejs",
+    "source_type": "interactive-reference",
+    "source_categories": [
+      "webgl",
+      "renderTarget"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "포트폴리오형",
+    "key_modules": [
+      "3d-hero",
+      "interactive-canvas",
+      "motion-scene",
+      "cta"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "Effects Anaglyph",
+    "site_url": "https://threejs.org/examples/webgl_effects_anaglyph.html",
+    "source": "threejs",
+    "source_type": "interactive-reference",
+    "source_categories": [
+      "webgl"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "콘텐츠형",
+    "key_modules": [
+      "3d-hero",
+      "interactive-canvas",
+      "motion-scene",
+      "cta"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "Effects Ascii",
+    "site_url": "https://threejs.org/examples/webgl_effects_ascii.html",
+    "source": "threejs",
+    "source_type": "interactive-reference",
+    "source_categories": [
+      "webgl"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "콘텐츠형",
+    "key_modules": [
+      "3d-hero",
+      "interactive-canvas",
+      "motion-scene",
+      "cta"
+    ],
+    "visual_mood": "editorial",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "Effects Parallaxbarrier",
+    "site_url": "https://threejs.org/examples/webgl_effects_parallaxbarrier.html",
+    "source": "threejs",
+    "source_type": "interactive-reference",
+    "source_categories": [
+      "webgl"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "콘텐츠형",
+    "key_modules": [
+      "3d-hero",
+      "interactive-canvas",
+      "motion-scene",
+      "cta"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T08:07:45.157Z",
+    "lumen_industry": "IT/소프트웨어"
   }
 ]
