@@ -11,9 +11,29 @@
     "https://team.imweb.me/",
     "https://salessupport.imweb.me/",
     "https://developers.imweb.me/",
-    "https://design.imweb.me/"
+    "https://design.imweb.me/",
+    "https://ispotionmaster.imweb.me/",
+    "https://laurenandleah.imweb.me/",
+    "https://mulgogiart.imweb.me/",
+    "https://semibasementseoul.imweb.me/",
+    "https://rawsugarplz.imweb.me/",
+    "https://beermakesmehigh.imweb.me/",
+    "https://sentens.imweb.me/",
+    "https://puppymingkoarchive.imweb.me/",
+    "https://antebe.imweb.me/",
+    "https://119reo2.imweb.me/",
+    "https://shakit02.imweb.me/",
+    "https://brewery304.imweb.me/",
+    "https://etq.imweb.me/",
+    "https://petit0-0.imweb.me/",
+    "https://kprinsighttree.imweb.me/",
+    "https://merrypage.imweb.me/",
+    "https://mnrm.imweb.me/",
+    "https://booksmuze.imweb.me/",
+    "https://alwayshungryclub.imweb.me/",
+    "https://youause.imweb.me/"
   ],
-  "lastRun": "2026-03-13T07:24:52.236Z",
+  "lastRun": "2026-03-13T07:27:20.674Z",
   "logs": [
     {
       "at": "2026-03-11T15:30:06.611Z",
@@ -59,6 +79,12 @@
       "at": "2026-03-13T07:24:52.236Z",
       "processed": 2,
       "added": 0
+    },
+    {
+      "at": "2026-03-13T07:27:20.674Z",
+      "scannedPages": 10,
+      "processed": 20,
+      "added": 20
     }
   ]
 }

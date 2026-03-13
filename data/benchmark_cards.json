@@ -171,5 +171,367 @@
     "visual_mood": "auto-derived",
     "analyzed_at": "2026-03-11T15:30:06.611Z",
     "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "이세계포션상점",
+    "site_url": "https://ispotionmaster.imweb.me/",
+    "source_categories": [
+      "BEAUTY"
+    ],
+    "industry_vertical": "뷰티",
+    "business_mode": "커뮤니티형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T07:27:20.674Z",
+    "lumen_industry": "뷰티/미용"
+  },
+  {
+    "site_name": "laurenandleah",
+    "site_url": "https://laurenandleah.imweb.me/",
+    "source_categories": [
+      "FASHION"
+    ],
+    "industry_vertical": "패션/잡화",
+    "business_mode": "소개/문의형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T07:27:20.674Z",
+    "lumen_industry": "쇼핑/이커머스"
+  },
+  {
+    "site_name": "물고기",
+    "site_url": "https://mulgogiart.imweb.me/",
+    "source_categories": [
+      "BLOG"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "판매형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T07:27:20.674Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "세미 베이스먼트",
+    "site_url": "https://semibasementseoul.imweb.me/",
+    "source_categories": [
+      "FASHION"
+    ],
+    "industry_vertical": "패션/잡화",
+    "business_mode": "판매형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T07:27:20.674Z",
+    "lumen_industry": "쇼핑/이커머스"
+  },
+  {
+    "site_name": "수가르",
+    "site_url": "https://rawsugarplz.imweb.me/",
+    "source_categories": [
+      "FOOD"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "커뮤니티형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T07:27:20.674Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "흐흐흐",
+    "site_url": "https://beermakesmehigh.imweb.me/",
+    "source_categories": [
+      "FASHION"
+    ],
+    "industry_vertical": "패션/잡화",
+    "business_mode": "소개/문의형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T07:27:20.674Z",
+    "lumen_industry": "쇼핑/이커머스"
+  },
+  {
+    "site_name": "센텐스",
+    "site_url": "https://sentens.imweb.me/",
+    "source_categories": [
+      "FASHION"
+    ],
+    "industry_vertical": "패션/잡화",
+    "business_mode": "판매형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T07:27:20.674Z",
+    "lumen_industry": "쇼핑/이커머스"
+  },
+  {
+    "site_name": "밍코아카이브",
+    "site_url": "https://puppymingkoarchive.imweb.me/",
+    "source_categories": [
+      "FASHION"
+    ],
+    "industry_vertical": "패션/잡화",
+    "business_mode": "콘텐츠형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T07:27:20.674Z",
+    "lumen_industry": "쇼핑/이커머스"
+  },
+  {
+    "site_name": "안테베",
+    "site_url": "https://antebe.imweb.me/",
+    "source_categories": [
+      "FASHION"
+    ],
+    "industry_vertical": "패션/잡화",
+    "business_mode": "커뮤니티형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T07:27:20.674Z",
+    "lumen_industry": "쇼핑/이커머스"
+  },
+  {
+    "site_name": "119레오",
+    "site_url": "https://119reo2.imweb.me/",
+    "source_categories": [
+      "FASHION"
+    ],
+    "industry_vertical": "패션/잡화",
+    "business_mode": "행사/프로모션형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T07:27:20.674Z",
+    "lumen_industry": "쇼핑/이커머스"
+  },
+  {
+    "site_name": "쉐이킷",
+    "site_url": "https://shakit02.imweb.me/",
+    "source_categories": [
+      "FOOD"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "소개/문의형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T07:27:20.674Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "브루어리304",
+    "site_url": "https://brewery304.imweb.me/",
+    "source_categories": [
+      "FOOD",
+      "RESTAURANT"
+    ],
+    "industry_vertical": "음식점/카페",
+    "business_mode": "판매형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T07:27:20.674Z",
+    "lumen_industry": "음식/카페"
+  },
+  {
+    "site_name": "에트큐",
+    "site_url": "https://etq.imweb.me/",
+    "source_categories": [
+      "INTERIOR"
+    ],
+    "industry_vertical": "인테리어/건축",
+    "business_mode": "소개/문의형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T07:27:20.674Z",
+    "lumen_industry": "기타"
+  },
+  {
+    "site_name": "쁘띠 아뜰리에",
+    "site_url": "https://petit0-0.imweb.me/",
+    "source_categories": [
+      "FASHION",
+      "LIFE"
+    ],
+    "industry_vertical": "패션/잡화",
+    "business_mode": "판매형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T07:27:20.674Z",
+    "lumen_industry": "쇼핑/이커머스"
+  },
+  {
+    "site_name": "KPR 인사이트 트리",
+    "site_url": "https://kprinsighttree.imweb.me/",
+    "source_categories": [
+      "BLOG"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "콘텐츠형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T07:27:20.674Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "메리페이지 디자인 스튜디오",
+    "site_url": "https://merrypage.imweb.me/",
+    "source_categories": [
+      "COMPANY"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "판매형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T07:27:20.674Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "모노룸",
+    "site_url": "https://mnrm.imweb.me/",
+    "source_categories": [
+      "BEAUTY"
+    ],
+    "industry_vertical": "뷰티",
+    "business_mode": "소개/문의형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T07:27:20.674Z",
+    "lumen_industry": "뷰티/미용"
+  },
+  {
+    "site_name": "무제",
+    "site_url": "https://booksmuze.imweb.me/",
+    "source_categories": [
+      "LIFE"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "판매형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T07:27:20.674Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "올웨이즈헝그리클럽",
+    "site_url": "https://alwayshungryclub.imweb.me/",
+    "source_categories": [
+      "ANIMAL"
+    ],
+    "industry_vertical": "IT/가전",
+    "business_mode": "커뮤니티형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T07:27:20.674Z",
+    "lumen_industry": "IT/소프트웨어"
+  },
+  {
+    "site_name": "you a use",
+    "site_url": "https://youause.imweb.me/",
+    "source_categories": [
+      "FASHION"
+    ],
+    "industry_vertical": "패션/잡화",
+    "business_mode": "소개/문의형",
+    "key_modules": [
+      "hero",
+      "category-or-sections",
+      "cta",
+      "contact"
+    ],
+    "visual_mood": "auto-derived",
+    "analyzed_at": "2026-03-13T07:27:20.674Z",
+    "lumen_industry": "쇼핑/이커머스"
   }
 ]
