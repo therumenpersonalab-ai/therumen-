@@ -31,9 +31,39 @@
     "https://mnrm.imweb.me/",
     "https://booksmuze.imweb.me/",
     "https://alwayshungryclub.imweb.me/",
-    "https://youause.imweb.me/"
+    "https://youause.imweb.me/",
+    "https://dwgkia1.imweb.me/",
+    "https://palette-on.imweb.me/",
+    "https://recordinthemorning.imweb.me/",
+    "https://zeezee.imweb.me/",
+    "https://nhrdesign.imweb.me/",
+    "https://bakedalaska.imweb.me/",
+    "https://doooho.imweb.me/",
+    "https://bommaum.imweb.me/",
+    "https://arlt.imweb.me/",
+    "https://info87552.imweb.me/",
+    "https://hopmaltyeast.imweb.me/",
+    "https://kingmarket.imweb.me/",
+    "https://seapuri.imweb.me/",
+    "https://soomokkr.imweb.me/",
+    "https://mopseul.imweb.me/",
+    "https://urte.imweb.me/",
+    "https://nuphy.imweb.me/",
+    "https://vaporofficial.imweb.me/",
+    "https://mrfixit.imweb.me/",
+    "https://inea2.imweb.me/",
+    "https://threejs.org/examples/webgl_animation_keyframes.html",
+    "https://threejs.org/examples/webgl_animation_skinning_blending.html",
+    "https://threejs.org/examples/webgl_animation_skinning_additive_blending.html",
+    "https://threejs.org/examples/webgl_animation_skinning_ik.html",
+    "https://threejs.org/examples/webgl_animation_skinning_morph.html",
+    "https://threejs.org/examples/webgl_animation_multiple.html",
+    "https://threejs.org/examples/webgl_animation_walk.html",
+    "https://threejs.org/examples/webgl_batch_lod_bvh.html",
+    "https://threejs.org/examples/webgl_camera.html",
+    "https://threejs.org/examples/webgl_camera_array.html"
   ],
-  "lastRun": "2026-03-13T07:27:20.674Z",
+  "lastRun": "2026-03-13T08:01:50.050Z",
   "logs": [
     {
       "at": "2026-03-11T15:30:06.611Z",
@@ -85,6 +115,16 @@
       "scannedPages": 10,
       "processed": 20,
       "added": 20
+    },
+    {
+      "at": "2026-03-13T08:01:50.050Z",
+      "scannedPages": 10,
+      "processed": 30,
+      "added": 30,
+      "addedBySource": {
+        "imweb": 20,
+        "threejs": 10
+      }
     }
   ]
 }
