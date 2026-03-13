@@ -9,7 +9,11 @@ const analyzedPath = path.join(DATA_DIR, 'analyzed_urls.json');
 const benchPath = path.join(DATA_DIR, 'benchmark_cards.json');
 
 const BEST_URL = 'https://imweb.me/best_production_list';
+const BEST_API_URL = 'https://imweb.me/_/api/io-legacy/ajax/get_best_production_list.cm';
 const TODAY = new Date().toISOString();
+const PAGE_SIZE = 24;
+const MAX_NEW_TEMPLATES = 20;
+const MAX_SCAN_PAGES = 10;
 
 function readJson(p, fallback) {
   try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return fallback; }
@@ -71,12 +75,53 @@ async function fetchText(url) {
   return await res.text();
 }
 
-function extractImwebLinks(html = '') {
-  const out = new Set();
-  const re = /https:\/\/[a-zA-Z0-9-]+\.imweb\.me\/?/g;
-  let m;
-  while ((m = re.exec(html))) out.add(m[0].replace(/\/$/, '') + '/');
-  return [...out];
+async function fetchBestProductionPage(page, filter = '*') {
+  const params = new URLSearchParams({
+    page_size: String(PAGE_SIZE),
+    current_page: String(page),
+    filter,
+  });
+  const res = await fetch(`${BEST_API_URL}?${params.toString()}`, {
+    headers: {
+      'user-agent': 'Mozilla/5.0 OpenClaw bot',
+      referer: BEST_URL,
+      accept: 'application/json, text/plain, */*',
+    },
+  });
+  if (!res.ok) throw new Error(`${BEST_API_URL} ${res.status}`);
+  const payload = await res.json();
+  if (payload?.msg !== 'SUCCESS' || !Array.isArray(payload?.data)) {
+    throw new Error(`unexpected best production payload: ${JSON.stringify(payload).slice(0, 200)}`);
+  }
+  return payload.data;
+}
+
+async function collectCandidateUrls(already = new Set()) {
+  const candidates = [];
+  const seen = new Set(already);
+
+  for (let page = 1; page <= MAX_SCAN_PAGES && candidates.length < MAX_NEW_TEMPLATES; page += 1) {
+    const items = await fetchBestProductionPage(page);
+    if (!items.length) break;
+
+    for (const item of items) {
+      const rawHost = String(item?.site_domain_name || '').trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
+      if (!rawHost || !/^[a-zA-Z0-9.-]+$/.test(rawHost)) continue;
+      const url = `https://${rawHost}/`;
+      if (seen.has(url)) continue;
+      seen.add(url);
+      candidates.push({
+        url,
+        subject: item?.subject || rawHost,
+        categories: Array.isArray(item?.category) ? item.category : [],
+      });
+      if (candidates.length >= MAX_NEW_TEMPLATES) break;
+    }
+
+    if (items.length < PAGE_SIZE) break;
+  }
+
+  return candidates;
 }
 
 async function run() {
@@ -84,22 +129,21 @@ async function run() {
   const cards = readJson(benchPath, []).map(normalizeCardForLumen);
   const already = new Set(analyzed.analyzed);
 
-  const listHtml = await fetchText(BEST_URL);
-  const candidates = extractImwebLinks(listHtml);
-
-  const targets = candidates.filter((u) => !already.has(u)).slice(0, 20);
+  const targets = await collectCandidateUrls(already);
   const added = [];
 
-  for (const url of targets) {
+  for (const target of targets) {
+    const { url, subject, categories } = target;
     try {
       const html = await fetchText(url);
       const host = new URL(url).hostname.replace('.imweb.me', '');
       const text = html.replace(/<[^>]+>/g, ' ').slice(0, 40000);
       const card = normalizeCardForLumen({
-        site_name: host,
+        site_name: subject || host,
         site_url: url,
-        industry_vertical: inferIndustry(text),
-        business_mode: inferMode(text),
+        source_categories: categories,
+        industry_vertical: inferIndustry(`${subject} ${categories.join(' ')} ${text}`),
+        business_mode: inferMode(`${subject} ${categories.join(' ')} ${text}`),
         key_modules: ['hero', 'category-or-sections', 'cta', 'contact'],
         visual_mood: 'auto-derived',
         analyzed_at: TODAY,
@@ -113,7 +157,7 @@ async function run() {
   }
 
   analyzed.lastRun = TODAY;
-  analyzed.logs.push({ at: TODAY, processed: targets.length, added: added.length });
+  analyzed.logs.push({ at: TODAY, scannedPages: MAX_SCAN_PAGES, processed: targets.length, added: added.length });
   analyzed.logs = analyzed.logs.slice(-200);
 
   writeJson(benchPath, cards);
